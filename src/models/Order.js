@@ -29,22 +29,13 @@ const OrderSchema = new mongoose.Schema({
     type: String, 
     enum: ['pendente', 'pago', 'enviado', 'cancelado'], 
     default: 'pendente' 
-  }, // Status do pedido
-  paymentMethod: { 
-    type: String, 
-    enum: ['pix', 'cartao', 'dinheiro'], 
-    required: true 
-  }, // Forma de pagamento
-  paymentStatus: { 
-    type: String, 
-    enum: ['pendente', 'confirmado', 'falhou'], 
-    default: 'pendente' 
-  }, // Status do pagamento
+  },
   shippingType: { 
     type: String, 
     enum: ['standard', 'expresso', 'grátis'], 
     required: true 
   }, // Tipo de frete
+  isTemporary: { type: Boolean, required: false }, 
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', OrderSchema);

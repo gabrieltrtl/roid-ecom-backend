@@ -110,10 +110,58 @@ const deleteOrder = async (req, res) => {
   }
 };
 
+// Criar um pedido temporário e gerar link para o cliente
+const createTemporaryOrder = async (req, res) => {
+  try {
+    const { products } = req.body;
+
+    const productIds = products.map( p => p.product);
+    const productsData = await Product.find({ '_id': { $in: productIds } });
+
+    if (productsData.length !== products.length) {
+      return res.status(400).json({ message: 'Um ou mais produtos não encontrados!' });
+    }
+
+    let totalPrice = 0;
+    const formattedProducts = products.map(p => {
+      const product = productsData.find(prod => prod._id.toString() === p.product.toString());
+      const productTotal = product.price * p.quantity; // Preço do produto * quantidade
+      totalPrice += productTotal; // Somar ao totalPrice
+
+      return {
+        product: product_id,
+        name: product.name,
+        price: product.price,
+        quantity: p.quantity,
+        subtotal: productTotal,
+      };
+    });
+
+    // criar novo pedido temporário no banco de dados
+    const newOrder = new Order({
+      products: formattedProducts,
+      totalPrice,
+      status: "pendente",
+      isTemporary: true,
+    });
+
+    await newOrder.save();
+
+    // Gerar link do pedido
+    const orderLink = `http://localhost:5173/pedido/${newOrder._id}`;
+
+    res.json({ orderId: newOrder._id, orderLink });
+  } catch (error) {
+    console.error("Erro ao criar pedido:", error);
+    res.status(500).json({ message: "Erro ao criar pedido" });
+  }
+};
+
 module.exports = {
   createOrder,
   getOrders,
   getOrderById,
   updateOrderStatus,
-  deleteOrder
+  deleteOrder,
+  createTemporaryOrder
 };
