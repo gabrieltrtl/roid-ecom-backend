@@ -1,0 +1,47 @@
+# 🔥 Ignorar node_modules (bibliotecas instaladas pelo npm/yarn)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# 🔥 Ignorar dependências do Vercel, Railway e Render
+.vercel/
+.netlify/
+.railway/
+render.yaml
+
+# 🔥 Ignorar builds do frontend e backend
+dist/
+build/
+
+# 🔥 Ignorar logs e arquivos temporários
+*.log
+logs/
+log/
+debug.log
+error.log
+pm2.log
+yarn.lock
+
+# 🔥 Ignorar arquivos de ambiente (NUNCA suba seu .env)
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.example
+
+# 🔥 Ignorar arquivos de cache
+.cache/
+.vscode/
+.DS_Store
+*.swp
+*.swo
+*.swn
+.idea/
+*.bak
+
+# 🔥 Ignorar uploads locais (se tiver uploads no backend)
+uploads/
+
+# 🔥 Ignorar arquivos do sistema operacional
+Thumbs.db
