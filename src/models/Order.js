@@ -5,7 +5,9 @@ const OrderSchema = new mongoose.Schema({
   customer: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Customer', 
-    required: true 
+    required: function() {
+      return !this.isTemporary; // 🔥 Só será obrigatório se `isTemporary` for false
+    } 
   }, // Cliente que fez o pedido
   products: [
     {
@@ -33,7 +35,6 @@ const OrderSchema = new mongoose.Schema({
   shippingType: { 
     type: String, 
     enum: ['standard', 'expresso', 'grátis'], 
-    required: true 
   }, // Tipo de frete
   isTemporary: { type: Boolean, required: false }, 
 }, { timestamps: true });

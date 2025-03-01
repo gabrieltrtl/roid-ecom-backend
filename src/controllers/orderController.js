@@ -129,7 +129,7 @@ const createTemporaryOrder = async (req, res) => {
       totalPrice += productTotal; // Somar ao totalPrice
 
       return {
-        product: product_id,
+        product: product._id,
         name: product.name,
         price: product.price,
         quantity: p.quantity,
@@ -149,6 +149,8 @@ const createTemporaryOrder = async (req, res) => {
 
     // Gerar link do pedido
     const orderLink = `http://localhost:5173/pedido/${newOrder._id}`;
+    console.log("Pedido criado:", newOrder);
+    console.log("Link do pedido gerado:", orderLink);
 
     res.json({ orderId: newOrder._id, orderLink });
   } catch (error) {

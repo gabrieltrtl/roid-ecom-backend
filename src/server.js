@@ -1,6 +1,8 @@
 const express = require('express');
 const conectarDB = require('./config/db');
 const cors = require('cors');
+const cron = require('node-cron');
+const cleanOldTemporaryOrders = require('./utils/cleanTemporaryOrders');
 require('dotenv').config();
 const customerRoutes = require('./routes/customerRoutes'); // Importando rotas de clientes
 const orderRoutes = require('./routes/orderRoutes'); // Importando rotas de pedidos
@@ -11,6 +13,12 @@ const app = express();
 
 // Conectar ao MongoDB
 conectarDB();
+
+// ✅ Agendar a limpeza de pedidos temporários
+cron.schedule('0 0 * * *', async () => {
+  console.log('🕛 Iniciando limpeza de pedidos temporários...');
+  await cleanOldTemporaryOrders();
+});
 
 // Middlewares 
 app.use(express.json());

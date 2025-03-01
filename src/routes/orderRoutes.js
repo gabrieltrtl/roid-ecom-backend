@@ -5,11 +5,15 @@ const {
   getOrders,
   getOrderById,
   updateOrderStatus,
-  deleteOrder
+  deleteOrder,
+  createTemporaryOrder
 } = require('../controllers/orderController');
 
 // Rota para criar pedido
 router.post('/orders', createOrder);     
+
+// Rota para criar pedido temporário
+router.post('/orders/temporary', createTemporaryOrder);
 
 // Listar todos os pedidos
 router.get('/orders', getOrders);       
