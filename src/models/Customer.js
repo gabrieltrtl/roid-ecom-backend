@@ -43,6 +43,7 @@ function validarCPF(cpf) {
 
 const CustomerSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  surname: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   phone: { type: String, required: true },
@@ -54,6 +55,15 @@ const CustomerSchema = new mongoose.Schema({
       validator: validarCPF,
       message: 'CPF inválido!'
     }
+  },
+  address: {
+    cep: { type: String, required: true },
+    street: { type: String, required: true },
+    neighborhood: { type: String, required: true },
+    number: { type: String, required: true },
+    complement: { type: String },
+    city: { type: String, required: true },
+    state: { type: String, required: true }
   }
 }, { timestamps: true });
 

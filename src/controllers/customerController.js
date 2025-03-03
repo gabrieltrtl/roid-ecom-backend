@@ -3,20 +3,37 @@ const Customer = require('../models/Customer');
 // Função para criar um cliente
 const createCustomer = async (req, res) => {
   try {
-    const { name, email, password, phone, cpf  } = req.body;
+    console.log("Requisição recebida:", req.body); // ✅ Verifica se o corpo da requisição chega
+    const { name, surname, email, password, phone, cpf, address  } = req.body;
+
+    if (!name || !surname || !email || !password || !phone || !cpf) {
+      console.log("❌ Campos ausentes:", { name, surname, email, password, phone, cpf }); // 🔥 VEJA O QUE ESTÁ FALTANDO
+      return res.status(400).json({ message: "Todos os campos são obrigatórios!" });
+    }
 
     // Verificar se o cliente já existe pelo CPF ou email
     const existingCustomer = await Customer.findOne({ $or: [{ cpf }, { email }] });
     if (existingCustomer) {
+      console.log("❌ Cliente já existe:", existingCustomer); // 🔥 LOGA CLIENTE DUPLICADO
       return res.status(400).json({ message: 'Cliente já cadastrado!' });
     }
 
     const customer = new Customer({
       name,
+      surname,
       email,
       password,
       phone,
-      cpf
+      cpf,
+      address: {
+        cep: address.cep,
+        street: address.street,
+        neighborhood: address.neighborhood,
+        number: address.number,
+        complement: address.complement,
+        city: address.city,
+        state: address.state
+      }
     });
 
     await customer.save();
