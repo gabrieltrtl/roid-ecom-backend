@@ -54,6 +54,10 @@ const CustomerSchema = new mongoose.Schema({
     validate: {
       validator: validarCPF,
       message: 'CPF inválido!'
+    },
+    set: (value) => {
+      // Remove traços ao salvar o CPF
+      return value.replace(/[^\d]/g, "");
     }
   },
   address: {
