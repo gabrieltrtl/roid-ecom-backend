@@ -84,6 +84,25 @@ const getCustomersByIds = async (req, res) => {
     res.status(500).json({ message: "Erro ao buscar clientes", error });
   }
 }
+
+const getCustomerByCpf = async (req, res) => {
+  const { cpf } = req.params; // Obtemos CPF da URL
+
+  try {
+    const customer = await Customer.findOne({ cpf });
+
+    if (!customer) {
+      return res.status(404).json({ message: "Cliente não encontrado" });
+    }
+
+    return res.status(200).json({
+      address: customer.address, // Supondo que o modelo Customer tenha um campo 'address'
+    });
+  } catch (error) {
+    console.error("Erro ao buscar cliente:", error);
+    return res.status(500).json({ message: "Erro ao buscar cliente" });
+  }
+}
 // Função para atualizar dados de um cliente
 const updateCustomer = async (req, res) => {
   try {
@@ -129,5 +148,6 @@ module.exports = {
   getCustomerById,
   getCustomersByIds,
   updateCustomer,
-  deleteCustomer
+  deleteCustomer,
+  getCustomerByCpf
 };

@@ -6,7 +6,8 @@ const {
   getOrderById,
   updateOrderStatus,
   deleteOrder,
-  createTemporaryOrder
+  createTemporaryOrder,
+  confirmOrder
 } = require('../controllers/orderController');
 
 // Rota para criar pedido
@@ -14,6 +15,8 @@ router.post('/orders', createOrder);
 
 // Rota para criar pedido temporário
 router.post('/orders/temporary', createTemporaryOrder);
+
+router.post("/orders/confirm/:orderId", confirmOrder);
 
 // Listar todos os pedidos
 router.get('/orders', getOrders);       

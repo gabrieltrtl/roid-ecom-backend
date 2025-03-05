@@ -159,11 +159,41 @@ const createTemporaryOrder = async (req, res) => {
   }
 };
 
+const confirmOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params; 
+    const { address } = req.body;
+    const trackingId = req.headers["tracking-id"]; // Obtém o trackingId do cabeçalho da requisição
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ message: "Pedido não encontrado!" });
+    }
+
+    if (order.isTemporary) {
+      order.isTemporary = false; // Marca como confirmado
+      order.address = address; // Atualiza o endereço
+      order.trackingId = trackingId; // Associa o trackingId à ordem
+      await order.save();
+  
+      res.status(200).json({ message: "Pedido confirmado com sucesso!" });
+    } else {
+      return res.status(400).json({ message: "Este pedido já foi confirmado." });
+    }
+    
+  } catch (error) {
+    console.error("Erro ao confirmar pedido:", error);
+    res.status(500).json({ message: "Erro ao confirmar pedido" });
+  }
+};
+
 module.exports = {
   createOrder,
   getOrders,
   getOrderById,
   updateOrderStatus,
   deleteOrder,
-  createTemporaryOrder
+  createTemporaryOrder,
+  confirmOrder
 };
