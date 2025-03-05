@@ -5,7 +5,8 @@ const {
   getAllCustomers, 
   getCustomerById,
   updateCustomer,
-  deleteCustomer 
+  deleteCustomer, 
+  getCustomersByIds
 } = require('../controllers/customerController');
 
 // Rota para criar um cliente
@@ -16,6 +17,9 @@ router.get('/customers', getAllCustomers);
 
 // Rota para buscar um cliente pelo ID
 router.get('/customers/:id', getCustomerById);
+
+// Rota pra buscar vários clientes pelos ids
+router.get('/customers/multiple/:ids', getCustomersByIds);
 
 // Rota para atualizar os dados de um cliente
 router.put('/customers/:id', updateCustomer);

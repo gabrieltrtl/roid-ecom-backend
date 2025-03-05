@@ -67,6 +67,23 @@ const getCustomerById = async (req, res) => {
   }
 };
 
+const getCustomersByIds = async (req, res) => {
+  try {
+    const { ids } = req.query;
+    const customerIds = ids.split(',').map(id => id.trim());
+    console.log('Ids recebidos', customerIds);
+
+    const customers = await Customer.find({ _id: { $in: customerIds } });
+
+    if (!customers || customers.length === 0) {
+      return res.status(404).json({ message: "Nenhum cliente encontrado!" });
+    }
+
+    res.status(200).json(customers);
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao buscar clientes", error });
+  }
+}
 // Função para atualizar dados de um cliente
 const updateCustomer = async (req, res) => {
   try {
@@ -110,6 +127,7 @@ module.exports = {
   createCustomer,
   getAllCustomers,
   getCustomerById,
+  getCustomersByIds,
   updateCustomer,
   deleteCustomer
 };
