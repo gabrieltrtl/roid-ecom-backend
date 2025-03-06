@@ -87,7 +87,6 @@ const getCustomersByIds = async (req, res) => {
 
 const getCustomerByCpf = async (req, res) => {
   const { cpf } = req.params; // Obtemos CPF da URL
-  console.log('CPF recebido na requisição:', cpf); 
 
   try {
     const customer = await Customer.findOne({ cpf });
