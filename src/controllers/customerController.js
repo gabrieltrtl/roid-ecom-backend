@@ -96,6 +96,8 @@ const getCustomerByCpf = async (req, res) => {
     }
 
     return res.status(200).json({
+      name: customer.name,
+      surname: customer.surname,
       address: customer.address, // Supondo que o modelo Customer tenha um campo 'address'
     });
   } catch (error) {
@@ -103,6 +105,7 @@ const getCustomerByCpf = async (req, res) => {
     return res.status(500).json({ message: "Erro ao buscar cliente" });
   }
 }
+
 // Função para atualizar dados de um cliente
 const updateCustomer = async (req, res) => {
   try {
