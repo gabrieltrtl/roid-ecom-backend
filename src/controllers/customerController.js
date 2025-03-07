@@ -3,18 +3,16 @@ const Customer = require('../models/Customer');
 // Função para criar um cliente
 const createCustomer = async (req, res) => {
   try {
-    console.log("Requisição recebida:", req.body); // ✅ Verifica se o corpo da requisição chega
+    
     const { name, surname, email, password, phone, cpf, address  } = req.body;
 
     if (!name || !surname || !email || !password || !phone || !cpf) {
-      console.log("❌ Campos ausentes:", { name, surname, email, password, phone, cpf }); // 🔥 VEJA O QUE ESTÁ FALTANDO
       return res.status(400).json({ message: "Todos os campos são obrigatórios!" });
     }
 
     // Verificar se o cliente já existe pelo CPF ou email
     const existingCustomer = await Customer.findOne({ $or: [{ cpf }, { email }] });
     if (existingCustomer) {
-      console.log("❌ Cliente já existe:", existingCustomer); // 🔥 LOGA CLIENTE DUPLICADO
       return res.status(400).json({ message: 'Cliente já cadastrado!' });
     }
 
@@ -71,7 +69,7 @@ const getCustomersByIds = async (req, res) => {
   try {
     const { ids } = req.query;
     const customerIds = ids.split(',').map(id => id.trim());
-    console.log('Ids recebidos', customerIds);
+    
 
     const customers = await Customer.find({ _id: { $in: customerIds } });
 
@@ -89,13 +87,16 @@ const getCustomerByCpf = async (req, res) => {
   const { cpf } = req.params; // Obtemos CPF da URL
 
   try {
-    const customer = await Customer.findOne({ cpf });
+    const customer = await Customer.findOne({ cpf }).select("_id name surname address"); // 🔥 `.lean()` transforma o retorno em um objeto simples
 
     if (!customer) {
       return res.status(404).json({ message: "Cliente não encontrado" });
     }
 
+  
+
     return res.status(200).json({
+      _id: customer._id.toString(),
       name: customer.name,
       surname: customer.surname,
       address: customer.address, // Supondo que o modelo Customer tenha um campo 'address'

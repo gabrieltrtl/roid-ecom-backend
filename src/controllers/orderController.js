@@ -63,7 +63,7 @@ const getOrders = async (req, res) => {
 const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
-    const order = await Order.findById(id).populate('customer', 'name email');
+    const order = await Order.findById(id).populate('customer');
 
     if (!order) {
       return res.status(404).json({ message: 'Pedido não encontrado' });
@@ -149,8 +149,6 @@ const createTemporaryOrder = async (req, res) => {
 
     // Gerar link do pedido
     const orderLink = `http://localhost:5173/pedido/${newOrder._id}`;
-    console.log("Pedido criado:", newOrder);
-    console.log("Link do pedido gerado:", orderLink);
 
     res.json({ orderId: newOrder._id, orderLink });
   } catch (error) {
@@ -162,8 +160,15 @@ const createTemporaryOrder = async (req, res) => {
 const confirmOrder = async (req, res) => {
   try {
     const { orderId } = req.params; 
-    const { address } = req.body;
-    const trackingId = req.headers["tracking-id"]; // Obtém o trackingId do cabeçalho da requisição
+    const { address, customer } = req.body;
+    const trackingId = req.headers["tracking-id"] || null; // Obtém o trackingId do cabeçalho da requisição
+
+    console.log("🛠️ Recebendo requisição de confirmação...");
+    console.log("🔹 orderId recebido:", orderId);
+    console.log("🔹 address recebido:", address);
+    console.log("🔹 customer recebido:", customer);
+    console.log("🔹 trackingId recebido:", trackingId);
+
 
     const order = await Order.findById(orderId);
 
@@ -171,9 +176,15 @@ const confirmOrder = async (req, res) => {
       return res.status(404).json({ message: "Pedido não encontrado!" });
     }
 
+    if (!order.isTemporary) {
+      console.warn("⚠️ Este pedido já foi confirmado.");
+      return res.status(400).json({ message: "Este pedido já foi confirmado." });
+    }
+
     if (order.isTemporary) {
       order.isTemporary = false; // Marca como confirmado
       order.address = address; // Atualiza o endereço
+      order.customer = customer;
       order.trackingId = trackingId; // Associa o trackingId à ordem
       await order.save();
   

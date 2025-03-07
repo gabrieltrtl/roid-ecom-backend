@@ -16,7 +16,7 @@ router.post('/orders', createOrder);
 // Rota para criar pedido temporário
 router.post('/orders/temporary', createTemporaryOrder);
 
-router.post("/orders/confirm/:orderId", confirmOrder);
+router.put("/orders/confirm/:orderId", confirmOrder);
 
 // Listar todos os pedidos
 router.get('/orders', getOrders);       

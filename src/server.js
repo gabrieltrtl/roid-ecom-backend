@@ -14,12 +14,6 @@ const app = express();
 // Conectar ao MongoDB
 conectarDB();
 
-// ✅ Agendar a limpeza de pedidos temporários
-cron.schedule('0 0 * * *', async () => {
-  console.log('🕛 Iniciando limpeza de pedidos temporários...');
-  await cleanOldTemporaryOrders();
-});
-
 // Middlewares 
 app.use(express.json());
 app.use(cors());
