@@ -14,6 +14,7 @@ const createCustomer = async (req, res) => {
     console.log(`🔍 Buscando cliente com CPF: ${formattedCpf}`);
 
     if (!name || !surname || !phone || !formattedCpf) {
+      console.warn("⚠️ Dados obrigatórios ausentes. Cancelando criação...");
       return res
         .status(400)
         .json({
@@ -31,6 +32,7 @@ const createCustomer = async (req, res) => {
     const customerData = {
       name,
       surname,
+      email: email && email.trim() !== "" ? email.trim() : undefined, // 🔥 Define `undefined` se o email for vazio
       phone,
       cpf: formattedCpf,
       address: {
@@ -44,19 +46,23 @@ const createCustomer = async (req, res) => {
       },
     };
 
+    
     if (email && email.trim() !== "") {
       customerData.email = email;
     }
-
+    
     if (password) {
       customerData.password = password;
     }
-
+    console.log("💾 Salvando novo cliente no banco...");
+    console.log('Customer Data:', customerData);
     const customer = new Customer(customerData);
 
     await customer.save();
+    console.log("✅ Cliente salvo com sucesso!");
     res.status(201).json({ message: "Cliente criado com sucesso!", customer });
   } catch (error) {
+    console.error("❌ ERRO AO SALVAR CLIENTE NO BANCO:", error);
     res.status(500).json({ message: "Erro ao criar cliente", error });
   }
 };
