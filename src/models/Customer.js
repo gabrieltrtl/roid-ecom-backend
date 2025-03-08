@@ -44,7 +44,7 @@ function validarCPF(cpf) {
 const CustomerSchema = new mongoose.Schema({
   name: { type: String, required: true },
   surname: { type: String, required: true },
-  email: { type: String, unique: true },
+  email: { type: String, unique: true, sparse: true }, 
   password: { type: String },
   phone: { type: String, required: true },
   cpf: { 
