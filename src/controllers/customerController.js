@@ -6,7 +6,7 @@ const createCustomer = async (req, res) => {
     
     const { name, surname, email, password, phone, cpf, address  } = req.body;
 
-    if (!name || !surname || !email || !password || !phone || !cpf) {
+    if (!name || !surname || !phone || !cpf) {
       return res.status(400).json({ message: "Todos os campos são obrigatórios!" });
     }
 
@@ -16,11 +16,10 @@ const createCustomer = async (req, res) => {
       return res.status(400).json({ message: 'Cliente já cadastrado!' });
     }
 
-    const customer = new Customer({
+    const customerData = {
       name,
       surname,
       email,
-      password,
       phone,
       cpf,
       address: {
@@ -30,9 +29,15 @@ const createCustomer = async (req, res) => {
         number: address.number,
         complement: address.complement,
         city: address.city,
-        state: address.state
-      }
-    });
+        state: address.state,
+      },
+    };
+    
+    if (password) {
+      customerData.password = password;
+    }
+
+    const customer = new Customer(customerData);
 
     await customer.save();
     res.status(201).json({ message: 'Cliente criado com sucesso!', customer });
