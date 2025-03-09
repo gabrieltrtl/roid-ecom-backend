@@ -1,7 +1,15 @@
 const mongoose = require('mongoose');
+const { customAlphabet } = require('nanoid');
 
+const generateOrderId = customAlphabet('0123456789', 6);
 
 const OrderSchema = new mongoose.Schema({
+  orderId: {
+    type: String,
+    unique: true,
+    required: true,
+    default: () => generateOrderId(), // Gera o ID aleatório automaticamente
+  },
   customer: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'Customer', 

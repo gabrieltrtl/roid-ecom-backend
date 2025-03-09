@@ -62,7 +62,7 @@ const createOrder = async (req, res) => {
 // Função para listar todos os pedidos
 const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find().populate("customer", "name email");
+    const orders = await Order.find().populate("customer", "name surname email");
     res.status(200).json(orders);
   } catch (error) {
     res.status(500).json({ message: "Erro ao buscar pedidos", error });
