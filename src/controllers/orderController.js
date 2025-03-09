@@ -1,29 +1,39 @@
-const Order = require('../models/Order');
-const Product = require('../models/Product'); // Adicionando a importação do modelo Product
-const Customer = require('../models/Customer');
-
+const Order = require("../models/Order");
+const Product = require("../models/Product"); // Adicionando a importação do modelo Product
+const Customer = require("../models/Customer");
 
 // Função para criar um novo pedido
 const createOrder = async (req, res) => {
   try {
-    const { customer, products, status, paymentMethod, paymentStatus, shippingType } = req.body;
+    const {
+      customer,
+      products,
+      status,
+      paymentMethod,
+      paymentStatus,
+      shippingType,
+    } = req.body;
 
     // Verificando se o cliente existe
     const customerExists = await Customer.findById(customer);
     if (!customerExists) {
-      return res.status(400).json({ message: 'Cliente não encontrado!' });
+      return res.status(400).json({ message: "Cliente não encontrado!" });
     }
 
     // Verificando se os produtos existem
-    const productIds = products.map(p => p.product);
-    const productsExist = await Product.find({ '_id': { $in: productIds } });
+    const productIds = products.map((p) => p.product);
+    const productsExist = await Product.find({ _id: { $in: productIds } });
     if (productsExist.length !== products.length) {
-      return res.status(400).json({ message: 'Um ou mais produtos não encontrados!' });
+      return res
+        .status(400)
+        .json({ message: "Um ou mais produtos não encontrados!" });
     }
 
     let totalPrice = 0;
-    const updatedProducts = products.map(p => {
-      const product = productsExist.find(prod => prod._id.toString() === p.product.toString());
+    const updatedProducts = products.map((p) => {
+      const product = productsExist.find(
+        (prod) => prod._id.toString() === p.product.toString()
+      );
       const productTotalPrice = product.price * p.quantity; // Preço do produto * quantidade
       totalPrice += productTotalPrice; // Somando ao totalPrice
       return {
@@ -39,23 +49,23 @@ const createOrder = async (req, res) => {
       status,
       paymentMethod,
       paymentStatus,
-      shippingType
+      shippingType,
     });
 
     await newOrder.save();
     res.status(201).json(newOrder);
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao criar pedido', error });
+    res.status(500).json({ message: "Erro ao criar pedido", error });
   }
 };
 
 // Função para listar todos os pedidos
 const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find().populate('customer', 'name email');
+    const orders = await Order.find().populate("customer", "name email");
     res.status(200).json(orders);
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao buscar pedidos', error });
+    res.status(500).json({ message: "Erro ao buscar pedidos", error });
   }
 };
 
@@ -63,15 +73,15 @@ const getOrders = async (req, res) => {
 const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
-    const order = await Order.findById(id).populate('customer');
+    const order = await Order.findById(id).populate("customer");
 
     if (!order) {
-      return res.status(404).json({ message: 'Pedido não encontrado' });
+      return res.status(404).json({ message: "Pedido não encontrado" });
     }
-    
+
     res.status(200).json(order);
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao buscar pedido', error });
+    res.status(500).json({ message: "Erro ao buscar pedido", error });
   }
 };
 
@@ -81,16 +91,19 @@ const updateOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const updatedOrder = await Order.findByIdAndUpdate(id, { status }, { new: true });
+    const updatedOrder = await Order.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
 
     if (!updatedOrder) {
-      return res.status(404).json({ message: 'Pedido não encontrado' });
+      return res.status(404).json({ message: "Pedido não encontrado" });
     }
 
     res.status(200).json(updatedOrder);
-
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao atualizar pedido', error });
+    res.status(500).json({ message: "Erro ao atualizar pedido", error });
   }
 };
 
@@ -99,14 +112,14 @@ const deleteOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const deletedOrder = await Order.findByIdAndDelete(id);
-    
+
     if (!deletedOrder) {
-      return res.status(404).json({ message: 'Pedido não encontrado' });
+      return res.status(404).json({ message: "Pedido não encontrado" });
     }
 
-    res.status(200).json({ message: 'Pedido deletado com sucesso' });
+    res.status(200).json({ message: "Pedido deletado com sucesso" });
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao deletar pedido', error });
+    res.status(500).json({ message: "Erro ao deletar pedido", error });
   }
 };
 
@@ -115,16 +128,20 @@ const createTemporaryOrder = async (req, res) => {
   try {
     const { products } = req.body;
 
-    const productIds = products.map( p => p.product);
-    const productsData = await Product.find({ '_id': { $in: productIds } });
+    const productIds = products.map((p) => p.product);
+    const productsData = await Product.find({ _id: { $in: productIds } });
 
     if (productsData.length !== products.length) {
-      return res.status(400).json({ message: 'Um ou mais produtos não encontrados!' });
+      return res
+        .status(400)
+        .json({ message: "Um ou mais produtos não encontrados!" });
     }
 
     let totalPrice = 0;
-    const formattedProducts = products.map(p => {
-      const product = productsData.find(prod => prod._id.toString() === p.product.toString());
+    const formattedProducts = products.map((p) => {
+      const product = productsData.find(
+        (prod) => prod._id.toString() === p.product.toString()
+      );
       const productTotal = product.price * p.quantity; // Preço do produto * quantidade
       totalPrice += productTotal; // Somar ao totalPrice
 
@@ -159,7 +176,9 @@ const createTemporaryOrder = async (req, res) => {
 
 const confirmOrder = async (req, res) => {
   try {
-    const { orderId } = req.params; 
+    console.log("🔍 Headers recebidos:", req.headers);
+
+    const { orderId } = req.params;
     const { address, customer } = req.body;
     const trackingId = req.headers["tracking-id"] || null; // Obtém o trackingId do cabeçalho da requisição
 
@@ -169,7 +188,6 @@ const confirmOrder = async (req, res) => {
     console.log("🔹 customer recebido:", customer);
     console.log("🔹 trackingId recebido:", trackingId);
 
-
     const order = await Order.findById(orderId);
 
     if (!order) {
@@ -178,21 +196,33 @@ const confirmOrder = async (req, res) => {
 
     if (!order.isTemporary) {
       console.warn("⚠️ Este pedido já foi confirmado.");
-      return res.status(400).json({ message: "Este pedido já foi confirmado." });
+      return res
+        .status(200)
+        .json({ message: "Este pedido já foi confirmado." });
     }
 
-    if (order.isTemporary) {
-      order.isTemporary = false; // Marca como confirmado
-      order.address = address; // Atualiza o endereço
-      order.customer = customer;
-      order.trackingId = trackingId; // Associa o trackingId à ordem
-      await order.save();
-  
-      res.status(200).json({ message: "Pedido confirmado com sucesso!" });
+    const existingOrders = await Order.findOne({
+      customer,
+      isTemporary: false,
+    });
+
+    if (!existingOrders) {
+      order.trackingId = trackingId;
+      console.log("✅ Primeira compra detectada! Associando trackingId:",trackingId);
     } else {
-      return res.status(400).json({ message: "Este pedido já foi confirmado." });
+      order.trackingId = null;
+      console.log(
+        "⚠️ Cliente já tem pedidos anteriores. Ignorando trackingId."
+      );
     }
-    
+
+    order.isTemporary = false; // Marca como confirmado
+    order.address = address; // Atualiza o endereço
+    order.customer = customer;
+
+    await order.save();
+
+    res.status(200).json({ message: "Pedido confirmado com sucesso!" });
   } catch (error) {
     console.error("Erro ao confirmar pedido:", error);
     res.status(500).json({ message: "Erro ao confirmar pedido" });
@@ -206,5 +236,5 @@ module.exports = {
   updateOrderStatus,
   deleteOrder,
   createTemporaryOrder,
-  confirmOrder
+  confirmOrder,
 };
