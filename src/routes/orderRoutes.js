@@ -7,12 +7,14 @@ const {
   updateOrderStatus,
   deleteOrder,
   createTemporaryOrder,
-  confirmOrder
+  confirmOrder,
+  getAverageTimeBetweenPurchases
 } = require('../controllers/orderController');
 
 // Rota para criar pedido
 router.post('/orders', createOrder);     
 
+router.get('/orders/average-time-between-purchases', getAverageTimeBetweenPurchases)
 // Rota para criar pedido temporário
 router.post('/orders/temporary', createTemporaryOrder);
 

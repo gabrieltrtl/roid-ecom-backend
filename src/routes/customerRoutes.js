@@ -31,4 +31,5 @@ router.put('/customers/:id', updateCustomer);
 // Rota para deletar um cliente
 router.delete('/customers/:id', deleteCustomer);
 
+
 module.exports = router;

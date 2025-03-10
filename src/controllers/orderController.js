@@ -174,6 +174,7 @@ const createTemporaryOrder = async (req, res) => {
   }
 };
 
+// Confirma uma ordem temporária
 const confirmOrder = async (req, res) => {
   try {
     console.log("🔍 Headers recebidos:", req.headers);
@@ -229,6 +230,50 @@ const confirmOrder = async (req, res) => {
   }
 };
 
+const getAverageTimeBetweenPurchases = async (req, res) => {
+  try {
+      const customers = await Order.aggregate([
+          {
+              $group: {
+                  _id: "$customer",
+                  orders: { $push: "$createdAt" } // Agrupa as datas de pedidos por cliente
+              }
+          }
+      ]);
+
+      let totalDays = 0;
+      let totalIntervals = 0;
+
+      customers.forEach((customer) => {
+          // Filtra clientes com pelo menos duas compras
+          if (customer.orders.length > 1) {
+              const sortedOrders = customer.orders.sort((a, b) => new Date(a) - new Date(b));
+
+              for (let i = 1; i < sortedOrders.length; i++) {
+                  const date1 = new Date(sortedOrders[i - 1]);
+                  const date2 = new Date(sortedOrders[i]);
+
+                  if (!isNaN(date1) && !isNaN(date2)) {
+                      const diffInMs = date2 - date1;
+                      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+                      totalDays += diffInDays;
+                      totalIntervals++;
+                  }
+              }
+          }
+      });
+
+      const averageTime = totalIntervals === 0 ? 0 : (totalDays / totalIntervals).toFixed(2);
+
+      res.json({ averageTimeBetweenPurchases: `${averageTime} dias` });
+  } catch (error) {
+      console.error("Erro ao calcular o tempo médio entre compras:", error);
+      res.status(500).json({ message: "Erro ao calcular o tempo médio entre compras" });
+  }
+};
+
+
+
 module.exports = {
   createOrder,
   getOrders,
@@ -237,4 +282,5 @@ module.exports = {
   deleteOrder,
   createTemporaryOrder,
   confirmOrder,
+  getAverageTimeBetweenPurchases
 };
