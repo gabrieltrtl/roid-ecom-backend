@@ -218,6 +218,7 @@ const confirmOrder = async (req, res) => {
     }
 
     order.isTemporary = false; // Marca como confirmado
+    order.status = "confirmado"; // atualiza o status
     order.address = address; // Atualiza o endereço
     order.customer = customer;
 
@@ -271,6 +272,10 @@ const getAverageTimeBetweenPurchases = async (req, res) => {
       res.status(500).json({ message: "Erro ao calcular o tempo médio entre compras" });
   }
 };
+
+const getSalesByTrackingId = async (req, res) => {
+  const { trackingId } = req.params;
+}
 
 
 
