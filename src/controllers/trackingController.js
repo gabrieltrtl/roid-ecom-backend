@@ -85,9 +85,26 @@ const getSalesByTrackingId = async (req, res) => {
   }
 };
 
+const deleteTracking = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const tracking = await Tracking.findByIdAndDelete(id);
+
+    if (!tracking) {
+      return res.status(404).json({ message: "Tracking ID não encontrado." });
+    }
+
+    return res.status(200).json({ message: "Tracking ID deletado com sucesso." });
+  } catch (error) {
+    console.error("Erro ao deletar trackingId:", error);
+    return res.status(500).json({ message: "Erro ao deletar trackingId." });
+  }
+};
+
 module.exports = {
   createTracking,
   getTracking,
   getSalesByTrackingId,
-  getAllTrackings
+  getAllTrackings,
+  deleteTracking
 };
