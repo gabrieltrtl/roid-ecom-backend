@@ -273,12 +273,6 @@ const getAverageTimeBetweenPurchases = async (req, res) => {
   }
 };
 
-const getSalesByTrackingId = async (req, res) => {
-  const { trackingId } = req.params;
-}
-
-
-
 module.exports = {
   createOrder,
   getOrders,
