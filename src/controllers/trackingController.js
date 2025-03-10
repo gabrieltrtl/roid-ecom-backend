@@ -1,5 +1,5 @@
-const Tracking = require("../models/Tracking");
-const { nanoid } = require("nanoid");
+const Tracking = require('../models/Tracking');
+const { nanoid } = require('nanoid');
 
 // Criar novo trackingId
 const createTracking = async (req, res) => {
@@ -12,7 +12,7 @@ const createTracking = async (req, res) => {
         .json({ message: "Nome do influenciador é obrigatório." });
     }
 
-    const trackingId = nanoId(8);
+    const trackingId = nanoid(8);
 
     const newTracking = await Tracking.create({ influencerName, trackingId });
 
@@ -22,6 +22,17 @@ const createTracking = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Erro interno ao criar trackingId." });
+  }
+};
+
+// Listar todos os trackings
+const getAllTrackings = async (req, res) => {
+  try {
+    const trackings = await Tracking.find();
+    return res.status(200).json(trackings);
+  } catch (error) {
+    console.error("Erro ao buscar trackingIds:", error);
+    return res.status(500).json({ message: "Erro ao buscar trackingIds." });
   }
 };
 
@@ -78,4 +89,5 @@ module.exports = {
   createTracking,
   getTracking,
   getSalesByTrackingId,
+  getAllTrackings
 };
