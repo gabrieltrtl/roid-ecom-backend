@@ -1,5 +1,4 @@
 const DiscountRule = require('../models/DiscountRule');
-const DiscountRule = require('../models/DiscountRule');
 
 // Criar nova regra de desconto
 const createDiscountRule = async (req, res) => {
