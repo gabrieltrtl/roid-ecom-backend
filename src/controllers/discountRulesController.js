@@ -70,7 +70,7 @@ const deleteDiscountRule = async (req, res) => {
       return res.status(404).json({ message: 'Regra de desconto não encontrada' });
     }
 
-    res.status(200).json({ message: 'Regra de desconto deletada com sucesso' });,
+    res.status(200).json({ message: 'Regra de desconto deletada com sucesso' });
   } catch (error) {
     res.status(500).json({ message: 'Erro ao deletar regra de desconto', error });
   }
