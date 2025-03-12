@@ -61,6 +61,29 @@ const updateDiscountRule = async (req, res) => {
   }
 };
 
+// Deletar uma regra de desconto
+const deleteDiscountRule = async (req, res) => {
+  try {
+    const discountRule = await DiscountRule.findByIdAndDelete(req.params.id);
+    
+    if (!discountRule) {
+      return res.status(404).json({ message: 'Regra de desconto não encontrada' });
+    }
+
+    res.status(200).json({ message: 'Regra de desconto deletada com sucesso' });,
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao deletar regra de desconto', error });
+  }
+};
+
+module.exports = {
+  createDiscountRule,
+  getDiscountRules,
+  getDiscountRuleById,
+  updateDiscountRule,
+  deleteDiscountRule,
+};
+
 
 
 
