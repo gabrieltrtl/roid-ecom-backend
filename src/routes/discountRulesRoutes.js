@@ -9,12 +9,12 @@ router.post('/discounts', createDiscountRule);
 router.get('/discounts', getDiscountRules);
 
 // Listar uma regra pelo ID
-router.get('discounts/:id', getDiscountRuleById);
+router.get('/discounts/:id', getDiscountRuleById);
 
 // Atualizar uma regra de desconto
-router.put('discounts/:id', updateDiscountRule);
+router.put('/discounts/:id', updateDiscountRule);
 
 // Deletar uma regra de desconto
-router.delete('discounts/:id', deleteDiscountRule);
+router.delete('/discounts/:id', deleteDiscountRule);
 
 module.exports = router;

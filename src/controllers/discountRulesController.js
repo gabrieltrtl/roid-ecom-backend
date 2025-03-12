@@ -32,6 +32,7 @@ const getDiscountRules = async (req, res) => {
 const getDiscountRuleById = async (req, res) => {
   try {
     const discountRule = await DiscountRule.findById(req.params.id).populate('includedProducts excludedProducts');
+
     if (!discountRule) {
       return res.status(404).json({ message: 'Regra de desconto não encontrada' });
     }
