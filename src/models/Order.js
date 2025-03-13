@@ -31,6 +31,11 @@ const OrderSchema = new mongoose.Schema({
       }, // Quantidade do produto comprado
     }
   ],
+  discountRule: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'DiscountRule', // ✅ Referência para o model DiscountRule
+    default: null,
+  },
   totalPrice: { 
     type: Number, 
     required: true 

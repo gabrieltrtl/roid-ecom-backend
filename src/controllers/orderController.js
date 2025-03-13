@@ -1,6 +1,7 @@
 const Order = require("../models/Order");
 const Product = require("../models/Product"); // Adicionando a importação do modelo Product
 const Customer = require("../models/Customer");
+const DiscountRule = require("../models/DiscountRule");
 
 // Função para criar um novo pedido
 const createOrder = async (req, res) => {
@@ -8,6 +9,7 @@ const createOrder = async (req, res) => {
     const {
       customer,
       products,
+      discountRule: discountRuleId,
       status,
       paymentMethod,
       paymentStatus,
@@ -29,11 +31,32 @@ const createOrder = async (req, res) => {
         .json({ message: "Um ou mais produtos não encontrados!" });
     }
 
+    let discountRule = null;
+    if (discountRuleId) {
+      discountRule = await DiscountRule.findById(discountRuleId);
+    }
+
     let totalPrice = 0;
     const updatedProducts = products.map((p) => {
-      const product = productsExist.find(
-        (prod) => prod._id.toString() === p.product.toString()
-      );
+      const product = productsExist.find((prod) => prod._id.toString() === p.product.toString());
+      let productPrice = product.price;
+
+      // aplicar desconto , se aplicável
+      if (discountRule) {
+        const isIncluded = discountRule.includedProducts.includes(product._id);
+        const isExcluded = discountRule.excludedProducts.includes(product._id);
+
+        if ((isIncluded || discountRule.includedProducts.length === 0) && !isExcluded) {
+          if (discountRule.type === 'percentage') {
+            productPrice -= (productPrice * discountRule.value) / 100;
+          } else if (discountRule.type === 'fixed') {
+            productPrice -= discountRule.value;
+          }
+
+          if (productPrice < 0) productPrice = 0;
+        }
+      }
+
       const productTotalPrice = product.price * p.quantity; // Preço do produto * quantidade
       totalPrice += productTotalPrice; // Somando ao totalPrice
       return {
@@ -45,6 +68,7 @@ const createOrder = async (req, res) => {
     const newOrder = new Order({
       customer,
       products: updatedProducts,
+      discountRule: discountRuleId,
       totalPrice,
       status,
       paymentMethod,
@@ -126,24 +150,43 @@ const deleteOrder = async (req, res) => {
 // Criar um pedido temporário e gerar link para o cliente
 const createTemporaryOrder = async (req, res) => {
   try {
-    const { products } = req.body;
+    const { products, discountRule: discountRuleId } = req.body;
 
     const productIds = products.map((p) => p.product);
     const productsData = await Product.find({ _id: { $in: productIds } });
 
     if (productsData.length !== products.length) {
-      return res
-        .status(400)
-        .json({ message: "Um ou mais produtos não encontrados!" });
+      return res.status(400).json({ message: "Um ou mais produtos não encontrados!" });
+    }
+
+    let discountRule = null;
+    if (discountRuleId) {
+      discountRule = await DiscountRule.findById(discountRuleId);
     }
 
     let totalPrice = 0;
     const formattedProducts = products.map((p) => {
-      const product = productsData.find(
-        (prod) => prod._id.toString() === p.product.toString()
-      );
-      const productTotal = product.price * p.quantity; // Preço do produto * quantidade
-      totalPrice += productTotal; // Somar ao totalPrice
+      const product = productsData.find((prod) => prod._id.toString() === p.product.toString());
+      let productPrice = product.price;
+
+      // ✅ Aplicar o desconto, se aplicável
+      if (discountRule) {
+        const isIncluded = discountRule.includedProducts.includes(product._id);
+        const isExcluded = discountRule.excludedProducts.includes(product._id);
+
+        if ((isIncluded || discountRule.includedProducts.length === 0) && !isExcluded) {
+          if (discountRule.type === 'percentage') {
+            productPrice -= (productPrice * discountRule.value) / 100;
+          } else if (discountRule.type === 'fixed') {
+            productPrice -= discountRule.value;
+          }
+
+          if (productPrice < 0) productPrice = 0;
+        }
+      }
+
+      const productTotal = productPrice * p.quantity;
+      totalPrice += productTotal;
 
       return {
         product: product._id,
@@ -157,6 +200,7 @@ const createTemporaryOrder = async (req, res) => {
     // criar novo pedido temporário no banco de dados
     const newOrder = new Order({
       products: formattedProducts,
+      discountRule: discountRuleId,
       totalPrice,
       status: "pendente",
       isTemporary: true,
