@@ -68,7 +68,12 @@ const CustomerSchema = new mongoose.Schema({
     complement: { type: String },
     city: { type: String, required: true },
     state: { type: String, required: true }
-  }
+  },
+  company: { // ✅ Associando o cliente à empresa
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Company',
+    required: true,
+  },
 }, { timestamps: true });
 
 /**
