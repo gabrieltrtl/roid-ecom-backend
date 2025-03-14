@@ -3,7 +3,7 @@ const Customer = require("../models/Customer");
 // Função para criar um cliente
 const createCustomer = async (req, res) => {
   try {
-    let { name, surname, email, password, phone, cpf, address } = req.body;
+    let { name, surname, email, password, phone, cpf, address, company } = req.body;
 
      // 🔥 Log inicial para depuração
      console.log("📩 Recebendo requisição para criar cliente...");
@@ -13,7 +13,7 @@ const createCustomer = async (req, res) => {
     const formattedCpf = cpf.replace(/\D/g, "").trim();
     console.log(`🔍 Buscando cliente com CPF: ${formattedCpf}`);
 
-    if (!name || !surname || !phone || !formattedCpf) {
+    if (!name || !surname || !phone || !formattedCpf || !company) {
       console.warn("⚠️ Dados obrigatórios ausentes. Cancelando criação...");
       return res
         .status(400)
@@ -23,7 +23,7 @@ const createCustomer = async (req, res) => {
     }
 
     // Verificar se o cliente já existe pelo CPF ou email
-    const existingCustomer = await Customer.findOne({ cpf: formattedCpf });
+    const existingCustomer = await Customer.findOne({ cpf: formattedCpf, company });
 
     if (existingCustomer) {
       return res.status(400).json({ message: "Cliente já cadastrado!" });
@@ -44,6 +44,7 @@ const createCustomer = async (req, res) => {
         city: address.city,
         state: address.state,
       },
+      company
     };
 
     
@@ -70,7 +71,8 @@ const createCustomer = async (req, res) => {
 // Função para listar todos os clientes
 const getAllCustomers = async (req, res) => {
   try {
-    const customers = await Customer.find();
+    const { company } = req.query;
+    const customers = await Customer.find({ company });
     res.status(200).json(customers);
   } catch (error) {
     res.status(500).json({ message: "Erro ao listar clientes", error });
@@ -81,7 +83,9 @@ const getAllCustomers = async (req, res) => {
 const getCustomerById = async (req, res) => {
   try {
     const { id } = req.params;
-    const customer = await Customer.findById(id);
+    const { company } = req.query;
+    
+    const customer = await Customer.findOne({ _id: id, company });
     if (!customer) {
       return res.status(404).json({ message: "Cliente não encontrado!" });
     }
@@ -93,10 +97,10 @@ const getCustomerById = async (req, res) => {
 
 const getCustomersByIds = async (req, res) => {
   try {
-    const { ids } = req.query;
+    const { ids, company } = req.query;
     const customerIds = ids.split(",").map((id) => id.trim());
 
-    const customers = await Customer.find({ _id: { $in: customerIds } });
+    const customers = await Customer.find({ _id: { $in: customerIds }, company });
 
     if (!customers || customers.length === 0) {
       return res.status(404).json({ message: "Nenhum cliente encontrado!" });
@@ -110,7 +114,7 @@ const getCustomersByIds = async (req, res) => {
 
 const getCustomerByCpf = async (req, res) => {
   let { cpf } = req.params; // Obtemos CPF da URL
-
+  const { company } = req.query;
   console.log("🔍 CPF recebido na API:", cpf);
   // 🔥 Remove qualquer caractere especial antes de buscar no banco
   cpf = cpf.replace(/\D/g, "").trim();
@@ -118,7 +122,7 @@ const getCustomerByCpf = async (req, res) => {
   console.log("🔍 CPF formatado para busca:", cpf);
 
   try {
-    const customer = await Customer.findOne({ cpf }).select(
+    const customer = await Customer.findOne({ cpf, company }).select(
       "_id name surname address"
     ); // 🔥 `.lean()` transforma o retorno em um objeto simples
 
@@ -142,16 +146,11 @@ const getCustomerByCpf = async (req, res) => {
 const updateCustomer = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, phone, cpf } = req.body;
+    const { company, ...updateData } = req.body;
 
-    const updatedCustomer = await Customer.findByIdAndUpdate(
-      id,
-      {
-        name,
-        email,
-        phone,
-        cpf,
-      },
+    const updatedCustomer = await Customer.findOneAndUpdate(
+      { _id: id, company},
+      updateData,
       { new: true }
     );
 
@@ -171,10 +170,11 @@ const updateCustomer = async (req, res) => {
 const deleteCustomer = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedCustomer = await Customer.findByIdAndDelete(id);
+    const { company } = req.query;
+    const deletedCustomer = await Customer.findOneAndDelete({ _id: id, company });
 
     if (!deletedCustomer) {
-      return res.status(404).json({ message: "Cliente não encontrado!" });
+      return res.status(404).json({ message: "Cliente não encontrado para esta empresa!" });
     }
 
     res.status(200).json({ message: "Cliente deletado com sucesso!" });
