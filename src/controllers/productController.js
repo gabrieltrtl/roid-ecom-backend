@@ -25,6 +25,11 @@ const createProduct = async (req, res) => {
 const getAllProducts = async (req, res) => {
   const { company } = req.query;
 
+  if (!company) {
+    // Validação para garantir que o campo 'company' seja informado
+    return res.status(400).json({ message: 'Empresa (company) é obrigatória na consulta.' });
+  }
+
   try {
     const products = await Product.find({ company });
     res.status(200).json(products);
@@ -39,10 +44,16 @@ const getProductById = async (req, res) => {
     const { id } = req.params;
     const { company } = req.query;
 
+    if (!company) {
+      // Validação para garantir que o campo 'company' seja informado
+      return res.status(400).json({ message: 'Empresa (company) é obrigatória na consulta.' });
+    }
+
     const product = await Product.findOne({ _id: id, company });
 
     if (!product) {
-      return res.status(404).json({ message: 'Produto não encontrado' });
+      // Retorna erro se o produto não for encontrado ou não pertencer à empresa
+      return res.status(404).json({ message: 'Produto não encontrado ou não pertence à empresa.' });
     }
 
     res.status(200).json(product);  // Retorna o produto encontrado
@@ -55,7 +66,12 @@ const getProductById = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;  // Pega o ID do produto da URL
-    const { name, description, price, images, company } = req.body;  // Pega os dados do produto
+    const { name, description, price, images, stock, company } = req.body;  // Pega os dados do produto
+
+    if (!company) {
+      // Validação para garantir que o campo 'company' seja informado
+      return res.status(400).json({ message: 'Empresa (company) é obrigatória.' });
+    }
 
     const updatedProduct = await Product.findOneAndUpdate(
       { _id: id, company},
@@ -64,7 +80,8 @@ const updateProduct = async (req, res) => {
     );  // Atualiza o produto e retorna a versão mais recente
 
     if (!updatedProduct) {
-      return res.status(404).json({ message: 'Produto não encontrado' });
+      // Retorna erro se o produto não for encontrado ou não pertencer à empresa
+      return res.status(404).json({ message: 'Produto não encontrado ou não pertence à empresa.' });
     }
 
     res.status(200).json(updatedProduct);  // Retorna o produto atualizado
@@ -82,7 +99,8 @@ const deleteProduct = async (req, res) => {
     const deletedProduct = await Product.findOneAndDelete({ _id: id, company });  // Deleta o produto
 
     if (!deletedProduct) {
-      return res.status(404).json({ message: 'Produto não encontrado' });
+      // Retorna erro se o produto não for encontrado ou não pertencer à empresa
+      return res.status(404).json({ message: 'Produto não encontrado ou não pertence à empresa.' });
     }
 
     res.status(200).json({ message: 'Produto deletado com sucesso' });  // Retorna uma mensagem de sucesso
