@@ -4,17 +4,15 @@ const { nanoid } = require('nanoid');
 // Criar novo trackingId
 const createTracking = async (req, res) => {
   try {
-    const { influencerName } = req.body;
+    const { influencerName, company } = req.body;
 
-    if (!influencerName) {
-      return res
-        .status(400)
-        .json({ message: "Nome do influenciador é obrigatório." });
+    if (!influencerName || !company) {
+      return res.status(400).json({ message: "Nome do influenciador e empresa (company) são obrigatórios." });
     }
 
     const trackingId = nanoid(8);
 
-    const newTracking = await Tracking.create({ influencerName, trackingId });
+    const newTracking = await Tracking.create({ influencerName, trackingId, company });
 
     return res.status(201).json(newTracking);
   } catch (error) {
@@ -27,8 +25,15 @@ const createTracking = async (req, res) => {
 
 // Listar todos os trackings
 const getAllTrackings = async (req, res) => {
+  const { company } = req.query; // Recebemos o 'company' via query
+
+  if (!company) {
+    // Validação para garantir que o campo 'company' seja informado
+    return res.status(400).json({ message: "Empresa (company) é obrigatória na consulta." });
+  }
+
   try {
-    const trackings = await Tracking.find();
+    const trackings = await Tracking.find({ company }); 
     return res.status(200).json(trackings);
   } catch (error) {
     console.error("Erro ao buscar trackingIds:", error);
@@ -38,13 +43,19 @@ const getAllTrackings = async (req, res) => {
 
 // Buscar um trackingId
 const getTracking = async (req, res) => {
-  try {
-    const { trackingId } = req.params;
+  const { company } = req.query;
+  const { trackingId } = req.params;
 
-    const tracking = await Tracking.findOne({ trackingId });
+  if (!company) {
+    // Validação para garantir que o campo 'company' seja informado
+    return res.status(400).json({ message: "Empresa (company) é obrigatória na consulta." });
+  }
+
+  try {
+    const tracking = await Tracking.findOne({ trackingId, company });
 
     if (!tracking) {
-      return res.status(404).json({ message: "Tracking ID não encontrado." });
+      return res.status(404).json({ message: "Tracking ID não encontrado ou não pertence à empresa." });
     }
 
     return res.status(200).json(tracking);
@@ -58,20 +69,21 @@ const getTracking = async (req, res) => {
 
 const getSalesByTrackingId = async (req, res) => {
   const { trackingId } = req.params;
+  const { company } = req.query; // Recebemos o 'company' via query
+
+  if (!company) {
+    return res.status(400).json({ message: "Empresa (company) é obrigatória na consulta." });
+  }
 
   try {
-    const orders = await Order.find({ trackingId, status: "confirmado" });
+    const orders = await Order.find({ trackingId, company, status: "confirmado" }); // Filtramos também por empresa
 
     if (!orders.length) {
-      return res
-        .status(404)
-        .json({ message: "Nenhuma venda encontrada para esse trackingId." });
+      return res.status(404).json({ message: "Nenhuma venda encontrada para esse trackingId." });
     }
+    
     const totalSales = orders.length;
-    const totalRevenue = orders.reduce(
-      (acc, order) => acc + order.totalPrice,
-      0
-    );
+    const totalRevenue = orders.reduce((acc, order) => acc + order.totalPrice, 0);
 
     return res.status(200).json({
       trackingId,
@@ -86,12 +98,19 @@ const getSalesByTrackingId = async (req, res) => {
 };
 
 const deleteTracking = async (req, res) => {
+  const { id } = req.params;
+  const { company } = req.body; // Recebemos o 'company' no corpo da requisição
+
+  if (!company) {
+    // Validação para garantir que o campo 'company' seja informado
+    return res.status(400).json({ message: "Empresa (company) é obrigatória." });
+  }
+
   try {
-    const { id } = req.params;
-    const tracking = await Tracking.findByIdAndDelete(id);
+    const tracking = await Tracking.findOneAndDelete({ _id: id, company }); // Garantimos que o tracking pertence à empresa
 
     if (!tracking) {
-      return res.status(404).json({ message: "Tracking ID não encontrado." });
+      return res.status(404).json({ message: "Tracking ID não encontrado ou não pertence à empresa." });
     }
 
     return res.status(200).json({ message: "Tracking ID deletado com sucesso." });
