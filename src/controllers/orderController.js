@@ -14,6 +14,7 @@ const createOrder = async (req, res) => {
       paymentMethod,
       paymentStatus,
       shippingType,
+      company
     } = req.body;
 
     // Verificando se o cliente existe
@@ -24,16 +25,17 @@ const createOrder = async (req, res) => {
 
     // Verificando se os produtos existem
     const productIds = products.map((p) => p.product);
-    const productsExist = await Product.find({ _id: { $in: productIds } });
+    const productsExist = await Product.find({ _id: { $in: productIds }, company });
     if (productsExist.length !== products.length) {
       return res
         .status(400)
         .json({ message: "Um ou mais produtos não encontrados!" });
     }
 
+    // Buscar regra de desconto, se existir.
     let discountRule = null;
     if (discountRuleId) {
-      discountRule = await DiscountRule.findById(discountRuleId);
+      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company }); // ✅ Garantia que a regra pertence à empresa
     }
 
     let totalPrice = 0;
@@ -57,15 +59,18 @@ const createOrder = async (req, res) => {
         }
       }
 
-      const productTotalPrice = product.price * p.quantity; // Preço do produto * quantidade
+      const productTotalPrice = productPrice * p.quantity; // Preço do produto * quantidade
       totalPrice += productTotalPrice; // Somando ao totalPrice
       return {
         product: p.product, // Mantendo o ID do produto
         quantity: p.quantity, // Mantendo a quantidade
+        price: productPrice, // ✅ Preço com desconto aplicado
+        subtotal: productTotalPrice, //
       };
     });
 
     const newOrder = new Order({
+      company,
       customer,
       products: updatedProducts,
       discountRule: discountRuleId,
@@ -86,7 +91,8 @@ const createOrder = async (req, res) => {
 // Função para listar todos os pedidos
 const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find().populate("customer", "name surname email");
+    const { company } = req.query;
+    const orders = await Order.find({ company }).populate("customer", "name surname email");
     res.status(200).json(orders);
   } catch (error) {
     res.status(500).json({ message: "Erro ao buscar pedidos", error });
@@ -97,7 +103,7 @@ const getOrders = async (req, res) => {
 const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
-    const order = await Order.findById(id).populate("customer");
+    const order = await Order.findById(id).populate("customer").populate("discountRule");
 
     if (!order) {
       return res.status(404).json({ message: "Pedido não encontrado" });
@@ -150,10 +156,10 @@ const deleteOrder = async (req, res) => {
 // Criar um pedido temporário e gerar link para o cliente
 const createTemporaryOrder = async (req, res) => {
   try {
-    const { products, discountRule: discountRuleId } = req.body;
+    const { products, discountRule: discountRuleId, company } = req.body;
 
     const productIds = products.map((p) => p.product);
-    const productsData = await Product.find({ _id: { $in: productIds } });
+    const productsData = await Product.find({ _id: { $in: productIds }, company });
 
     if (productsData.length !== products.length) {
       return res.status(400).json({ message: "Um ou mais produtos não encontrados!" });
@@ -161,7 +167,7 @@ const createTemporaryOrder = async (req, res) => {
 
     let discountRule = null;
     if (discountRuleId) {
-      discountRule = await DiscountRule.findById(discountRuleId);
+      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company }); // ✅ Garantia que a regra pertence à empresa
     }
 
     let totalPrice = 0;
@@ -191,14 +197,15 @@ const createTemporaryOrder = async (req, res) => {
       return {
         product: product._id,
         name: product.name,
-        price: product.price,
+        price: productPrice, // ✅ Preço com desconto aplicado
         quantity: p.quantity,
-        subtotal: productTotal,
+        subtotal: productTotal, // ✅ Subtotal armazenado
       };
     });
 
     // criar novo pedido temporário no banco de dados
     const newOrder = new Order({
+      company,
       products: formattedProducts,
       discountRule: discountRuleId,
       totalPrice,
