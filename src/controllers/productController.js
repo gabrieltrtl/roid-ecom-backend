@@ -3,14 +3,15 @@ const Product = require('../models/Product');
 // Função para criar um produto
 const createProduct = async (req, res) => {
   try {
-    const { name, description, price, stock, images } = req.body; // Recebe os dados do produto
+    const { name, description, price, stock, images, company } = req.body; // Recebe os dados do produto
 
     const newProduct = new Product({
       name,
       description,
       price,
       stock,
-      images
+      images,
+      company
     });
 
     await newProduct.save();  // Salva o novo produto no banco de dados
@@ -22,8 +23,10 @@ const createProduct = async (req, res) => {
 
 // Função para listar todos os produtos
 const getAllProducts = async (req, res) => {
+  const { company } = req.query;
+
   try {
-    const products = await Product.find();
+    const products = await Product.find({ company });
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao listar produtos', error });
@@ -34,7 +37,9 @@ const getAllProducts = async (req, res) => {
 const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id);
+    const { company } = req.query;
+
+    const product = await Product.findOne({ _id: id, company });
 
     if (!product) {
       return res.status(404).json({ message: 'Produto não encontrado' });
@@ -50,14 +55,13 @@ const getProductById = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;  // Pega o ID do produto da URL
-    const { name, description, price, images } = req.body;  // Pega os dados do produto
+    const { name, description, price, images, company } = req.body;  // Pega os dados do produto
 
-    const updatedProduct = await Product.findByIdAndUpdate(id, {
-      name,
-      description,
-      price,
-      images
-    }, { new: true });  // Atualiza o produto e retorna a versão mais recente
+    const updatedProduct = await Product.findOneAndUpdate(
+      { _id: id, company},
+      { name, description, price, stock, images },
+      { new: true }
+    );  // Atualiza o produto e retorna a versão mais recente
 
     if (!updatedProduct) {
       return res.status(404).json({ message: 'Produto não encontrado' });
@@ -73,8 +77,9 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;  // Pega o ID do produto da URL
+    const { company } = req.body;
 
-    const deletedProduct = await Product.findByIdAndDelete(id);  // Deleta o produto
+    const deletedProduct = await Product.findOneAndDelete({ _id: id, company });  // Deleta o produto
 
     if (!deletedProduct) {
       return res.status(404).json({ message: 'Produto não encontrado' });
