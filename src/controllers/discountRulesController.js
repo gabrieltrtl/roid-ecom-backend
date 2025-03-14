@@ -3,14 +3,21 @@ const DiscountRule = require('../models/DiscountRule');
 // Criar nova regra de desconto
 const createDiscountRule = async (req, res) => {
   try {
-    const { name, description, type, value, includedProducts, excludedProducts } = req.body;
+    const { name, description, type, value, includedProducts, excludedProducts, company } = req.body;
+
+    if (!company) {
+      // Validação para garantir que o campo 'company' seja informado
+      return res.status(400).json({ message: 'Empresa (company) é obrigatória.' });
+    }
+
     const discountRule = await DiscountRule.create({ 
       name, 
       description,
       type,
       value,
       includedProducts,
-      excludedProducts 
+      excludedProducts,
+      company
     });
     res.status(201).json(discountRule);
   } catch (error) {
@@ -20,8 +27,15 @@ const createDiscountRule = async (req, res) => {
 
 // Listar todas as regras de desconto
 const getDiscountRules = async (req, res) => {
+  const { company } = req.query; // Recebemos o 'company' via query
+
+  if (!company) {
+    // Validação para garantir que o campo 'company' seja informado
+    return res.status(400).json({ message: 'Empresa (company) é obrigatória na consulta.' });
+  }
+
   try {
-    const discountRules = await DiscountRule.find().populate('includedProducts excludedProducts');
+    const discountRules = await DiscountRule.find({ company }).populate('includedProducts excludedProducts');
     res.status(200).json(discountRules);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao buscar regras de desconto', error });
@@ -30,8 +44,15 @@ const getDiscountRules = async (req, res) => {
 
 // Buscar uma regra de desconto por ID
 const getDiscountRuleById = async (req, res) => {
+  const { company } = req.query; // Recebemos o 'company' via query
+
+  if (!company) {
+    // Validação para garantir que o campo 'company' seja informado
+    return res.status(400).json({ message: 'Empresa (company) é obrigatória na consulta.' });
+  }
+
   try {
-    const discountRule = await DiscountRule.findById(req.params.id).populate('includedProducts excludedProducts');
+    const discountRule = await DiscountRule.findOne({ _id: req.params.id, company }).populate('includedProducts excludedProducts');
 
     if (!discountRule) {
       return res.status(404).json({ message: 'Regra de desconto não encontrada' });
@@ -44,17 +65,26 @@ const getDiscountRuleById = async (req, res) => {
 
 // Atualizar uma regra de desconto
 const updateDiscountRule = async (req, res) => {
+  const { company } = req.body; // Recebemos o 'company' via body
+
+  if (!company) {
+    // Validação para garantir que o campo 'company' seja informado
+    return res.status(400).json({ message: 'Empresa (company) é obrigatória.' });
+  }
+
   try {
     const { name, description, type, value, includedProducts, excludedProducts } = req.body;
-    const discountRule = await DiscountRule.findByIdAndUpdate(
-      req.params.id,
+    const discountRule = await DiscountRule.findOneAndUpdate(
+      { _id: req.params.id, company }, // Filtramos pelo ID e empresa
       { name, description, type, value, includedProducts, excludedProducts },
       { new: true }
     );
 
     if (!discountRule) {
-      return res.status(404).json({ message: 'Regra de desconto não encontrada' });
+      // Retorna erro se a regra não for encontrada ou não pertencer à empresa
+      return res.status(404).json({ message: 'Regra de desconto não encontrada ou não pertence à empresa.' });
     }
+
     res.status(200).json(discountRule);
   } catch (error) {
     res.status(400).json({ message: 'Erro ao atualizar regra de desconto', error });
@@ -63,11 +93,19 @@ const updateDiscountRule = async (req, res) => {
 
 // Deletar uma regra de desconto
 const deleteDiscountRule = async (req, res) => {
+  const { company } = req.body; // Recebemos o 'company' via body
+
+  if (!company) {
+    // Validação para garantir que o campo 'company' seja informado
+    return res.status(400).json({ message: 'Empresa (company) é obrigatória.' });
+  }
+
   try {
-    const discountRule = await DiscountRule.findByIdAndDelete(req.params.id);
+    const discountRule = await DiscountRule.findOneAndDelete({ _id: req.params.id, company }); 
     
     if (!discountRule) {
-      return res.status(404).json({ message: 'Regra de desconto não encontrada' });
+      // Retorna erro se a regra não for encontrada ou não pertencer à empresa
+      return res.status(404).json({ message: 'Regra de desconto não encontrada ou não pertence à empresa.' });
     }
 
     res.status(200).json({ message: 'Regra de desconto deletada com sucesso' });
