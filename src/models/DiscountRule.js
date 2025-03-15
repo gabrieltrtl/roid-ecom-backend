@@ -18,7 +18,8 @@ const discountRuleSchema = new mongoose.Schema({
     required: true,
   },
   includedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }], // ✅ Produtos incluídos
-  excludedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }], // ✅ Produtos excluídos
+  excludedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+  company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true }, // ✅ Produtos excluídos
 }, { timestamps: true });
 
 module.exports = mongoose.model('DiscountRule', discountRuleSchema);

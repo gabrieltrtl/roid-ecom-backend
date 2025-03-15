@@ -3,12 +3,7 @@ const DiscountRule = require('../models/DiscountRule');
 // Criar nova regra de desconto
 const createDiscountRule = async (req, res) => {
   try {
-    const { name, description, type, value, includedProducts, excludedProducts, company } = req.body;
-
-    if (!company) {
-      // Validação para garantir que o campo 'company' seja informado
-      return res.status(400).json({ message: 'Empresa (company) é obrigatória.' });
-    }
+    const { name, description, type, value, includedProducts, excludedProducts } = req.body;
 
     const discountRule = await DiscountRule.create({ 
       name, 
@@ -17,7 +12,7 @@ const createDiscountRule = async (req, res) => {
       value,
       includedProducts,
       excludedProducts,
-      company
+      company: req.company._id
     });
     res.status(201).json(discountRule);
   } catch (error) {
