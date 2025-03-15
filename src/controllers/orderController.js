@@ -14,7 +14,6 @@ const createOrder = async (req, res) => {
       paymentMethod,
       paymentStatus,
       shippingType,
-      company
     } = req.body;
 
     // Verificando se o cliente existe
@@ -25,7 +24,7 @@ const createOrder = async (req, res) => {
 
     // Verificando se os produtos existem
     const productIds = products.map((p) => p.product);
-    const productsExist = await Product.find({ _id: { $in: productIds }, company });
+    const productsExist = await Product.find({ _id: { $in: productIds }, company: req.company._id });
     if (productsExist.length !== products.length) {
       return res
         .status(400)
@@ -35,7 +34,7 @@ const createOrder = async (req, res) => {
     // Buscar regra de desconto, se existir.
     let discountRule = null;
     if (discountRuleId) {
-      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company }); // ✅ Garantia que a regra pertence à empresa
+      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company: req.company._id }); // ✅ Garantia que a regra pertence à empresa
     }
 
     let totalPrice = 0;
@@ -155,23 +154,45 @@ const deleteOrder = async (req, res) => {
 // Criar um pedido temporário e gerar link para o cliente
 const createTemporaryOrder = async (req, res) => {
   try {
-    const { products, discountRule: discountRuleId, company } = req.body;
+    const { products, discountRule: discountRuleId } = req.body;
+    console.log("🏢 Empresa identificada:", req.company);
+
+    if (!req.company) {
+      console.error("❌ Empresa não identificada.");
+      return res.status(400).json({ message: "Empresa não identificada!" });
+    }
+
+    if (!products || products.length === 0) {
+      console.error("❌ Nenhum produto fornecido.");
+      return res.status(400).json({ message: "Produtos obrigatórios." });
+    }
 
     const productIds = products.map((p) => p.product);
-    const productsData = await Product.find({ _id: { $in: productIds }, company });
+    const productsData = await Product.find({ _id: { $in: productIds }, company: req.company._id });
 
     if (productsData.length !== products.length) {
+      console.error("❌ Produtos não encontrados:", productIds);
       return res.status(400).json({ message: "Um ou mais produtos não encontrados!" });
     }
 
     let discountRule = null;
     if (discountRuleId) {
-      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company }); // ✅ Garantia que a regra pertence à empresa
+      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company: req.company._id }); // ✅ Garantia que a regra pertence à empresa
+      if (!discountRule) {
+        console.error(`❌ Regra de desconto com ID ${discountRuleId} não encontrada.`);
+        return res.status(404).json({ message: "Regra de desconto não encontrada!" });
+      }
     }
 
     let totalPrice = 0;
     const formattedProducts = products.map((p) => {
       const product = productsData.find((prod) => prod._id.toString() === p.product.toString());
+
+      if (!product) {
+        console.error(`❌ Produto com ID ${p.product} não encontrado.`);
+        throw new Error(`Produto com ID ${p.product} não encontrado.`);
+      }
+
       let productPrice = product.price;
 
       // ✅ Aplicar o desconto, se aplicável
@@ -202,9 +223,16 @@ const createTemporaryOrder = async (req, res) => {
       };
     });
 
+    console.log("📝 Criando novo pedido temporário com os dados:", {
+      company: req.company._id,
+      products: formattedProducts,
+      discountRule: discountRuleId,
+      totalPrice,
+    });
+
     // criar novo pedido temporário no banco de dados
     const newOrder = new Order({
-      company,
+      company: req.company._id,
       products: formattedProducts,
       discountRule: discountRuleId,
       totalPrice,
@@ -215,12 +243,14 @@ const createTemporaryOrder = async (req, res) => {
     await newOrder.save();
 
     // Gerar link do pedido
-    const orderLink = `http://localhost:5173/pedido/${newOrder._id}`;
+    const host = req.headers.host || 'localhost:5173';
+    const orderLink = `http://${host}/pedido/${newOrder._id}`;
+
 
     res.json({ orderId: newOrder._id, orderLink });
   } catch (error) {
-    console.error("Erro ao criar pedido:", error);
-    res.status(500).json({ message: "Erro ao criar pedido" });
+    console.error("❌ Erro ao criar pedido temporário:", error);
+    res.status(500).json({ message: "Erro ao criar pedido temporário", error });
   }
 };
 

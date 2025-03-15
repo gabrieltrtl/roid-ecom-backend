@@ -4,7 +4,7 @@ const { customAlphabet } = require('nanoid');
 const generateOrderId = customAlphabet('0123456789', 6);
 
 const OrderSchema = new mongoose.Schema({
-  companyId: {
+  company: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Company',
     required: true,

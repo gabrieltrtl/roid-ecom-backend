@@ -4,15 +4,15 @@ const { nanoid } = require('nanoid');
 // Criar novo trackingId
 const createTracking = async (req, res) => {
   try {
-    const { influencerName, company } = req.body;
+    const { influencerName } = req.body;
 
-    if (!influencerName || !company) {
-      return res.status(400).json({ message: "Nome do influenciador e empresa (company) são obrigatórios." });
+    if (!influencerName) {
+      return res.status(400).json({ message: "Nome do influenciador é obrigatório." });
     }
 
     const trackingId = nanoid(8);
 
-    const newTracking = await Tracking.create({ influencerName, trackingId, company });
+    const newTracking = await Tracking.create({ influencerName, trackingId, company: req.company._id });
 
     return res.status(201).json(newTracking);
   } catch (error) {
@@ -37,11 +37,6 @@ const getAllTrackings = async (req, res) => {
 // Buscar um trackingId
 const getTracking = async (req, res) => {
   const { trackingId } = req.params;
-
-  if (!company) {
-    // Validação para garantir que o campo 'company' seja informado
-    return res.status(400).json({ message: "Empresa (company) é obrigatória na consulta." });
-  }
 
   try {
     const tracking = await Tracking.findOne({ trackingId, company: req.company._id });
