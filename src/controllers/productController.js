@@ -23,15 +23,8 @@ const createProduct = async (req, res) => {
 
 // Função para listar todos os produtos
 const getAllProducts = async (req, res) => {
-  const { company } = req.query;
-
-  if (!company) {
-    // Validação para garantir que o campo 'company' seja informado
-    return res.status(400).json({ message: 'Empresa (company) é obrigatória na consulta.' });
-  }
-
   try {
-    const products = await Product.find({ company });
+    const products = await Product.find({ company: req.company._id });
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao listar produtos', error });
@@ -42,14 +35,8 @@ const getAllProducts = async (req, res) => {
 const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const { company } = req.query;
 
-    if (!company) {
-      // Validação para garantir que o campo 'company' seja informado
-      return res.status(400).json({ message: 'Empresa (company) é obrigatória na consulta.' });
-    }
-
-    const product = await Product.findOne({ _id: id, company });
+    const product = await Product.findOne({ _id: id, company: req.company._id });
 
     if (!product) {
       // Retorna erro se o produto não for encontrado ou não pertencer à empresa
@@ -94,9 +81,8 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;  // Pega o ID do produto da URL
-    const { company } = req.body;
 
-    const deletedProduct = await Product.findOneAndDelete({ _id: id, company });  // Deleta o produto
+    const deletedProduct = await Product.findOneAndDelete({ _id: id, company: req.company._id });  // Deleta o produto
 
     if (!deletedProduct) {
       // Retorna erro se o produto não for encontrado ou não pertencer à empresa

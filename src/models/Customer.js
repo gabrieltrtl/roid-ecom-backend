@@ -92,4 +92,6 @@ CustomerSchema.methods.comparePassword = async function (password) {
   return bcrypt.compare(password, this.password);
 };
 
+CustomerSchema.index({ cpf: 1, company: 1 }, { unique: true });
+
 module.exports = mongoose.model('Customer', CustomerSchema);
