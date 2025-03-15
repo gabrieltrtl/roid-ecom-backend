@@ -53,15 +53,10 @@ const getProductById = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;  // Pega o ID do produto da URL
-    const { name, description, price, images, stock, company } = req.body;  // Pega os dados do produto
-
-    if (!company) {
-      // Validação para garantir que o campo 'company' seja informado
-      return res.status(400).json({ message: 'Empresa (company) é obrigatória.' });
-    }
+    const { name, description, price, images, stock } = req.body;  // Pega os dados do produto
 
     const updatedProduct = await Product.findOneAndUpdate(
-      { _id: id, company},
+      { _id: id, company: req.company._id},
       { name, description, price, stock, images },
       { new: true }
     );  // Atualiza o produto e retorna a versão mais recente
