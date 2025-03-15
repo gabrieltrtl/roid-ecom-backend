@@ -3,7 +3,7 @@ const Product = require('../models/Product');
 // Função para criar um produto
 const createProduct = async (req, res) => {
   try {
-    const { name, description, price, stock, images, company } = req.body; // Recebe os dados do produto
+    const { name, description, price, stock, images } = req.body; // Recebe os dados do produto
 
     const newProduct = new Product({
       name,
@@ -11,7 +11,7 @@ const createProduct = async (req, res) => {
       price,
       stock,
       images,
-      company
+      company: req.company._id
     });
 
     await newProduct.save();  // Salva o novo produto no banco de dados
