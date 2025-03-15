@@ -28,6 +28,7 @@ const identifyCompany = async (req, res, next) => {
     }
 
     req.company = company; // 🔥 Armazena a empresa na requisição para usar nos controllers
+    console.log("🏢 Empresa identificada no middleware:", req.company);
     next();
   } catch (error) {
     console.error("Erro ao identificar empresa:", error);

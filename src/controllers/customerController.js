@@ -3,7 +3,8 @@ const Customer = require("../models/Customer");
 // Função para criar um cliente
 const createCustomer = async (req, res) => {
   try {
-    let { name, surname, email, password, phone, cpf, address, company } = req.body;
+    console.log('Empresa identificada no req:', req.company); 
+    let { name, surname, email, password, phone, cpf, address } = req.body;
 
      // 🔥 Log inicial para depuração
      console.log("📩 Recebendo requisição para criar cliente...");
@@ -19,7 +20,7 @@ const createCustomer = async (req, res) => {
     }
 
     // Verificar se o cliente já existe pelo CPF ou email
-    const existingCustomer = await Customer.findOne({ cpf: formattedCpf, company });
+    const existingCustomer = await Customer.findOne({ cpf: formattedCpf, company: req.company._id });
 
     if (existingCustomer) {
       return res.status(400).json({ message: "Cliente já cadastrado!" });
