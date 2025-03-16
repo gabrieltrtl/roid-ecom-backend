@@ -243,8 +243,9 @@ const createTemporaryOrder = async (req, res) => {
     await newOrder.save();
 
     // Gerar link do pedido
-    const host = req.headers.host || 'localhost:5173';
-    const orderLink = `http://${host}/pedido/${newOrder._id}`;
+    const subdomain = req.company?.domain || 'localhost';
+    const port = 5173; // Use variável de ambiente se quiser
+    const orderLink = `http://${subdomain}.localhost:${port}/pedido/${newOrder._id}`;
 
 
     res.json({ orderId: newOrder._id, orderLink });
