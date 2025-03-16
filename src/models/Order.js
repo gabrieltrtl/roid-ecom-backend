@@ -47,7 +47,7 @@ const OrderSchema = new mongoose.Schema({
   }, // Total da compra
   status: { 
     type: String, 
-    enum: ['pendente', 'pago', 'enviado', 'cancelado'], 
+    enum: ['pendente', 'pago', 'enviado', 'cancelado', 'confirmado'], 
     default: 'pendente' 
   },
   shippingType: { 
