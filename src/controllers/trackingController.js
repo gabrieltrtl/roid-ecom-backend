@@ -4,22 +4,27 @@ const { nanoid } = require('nanoid');
 // Criar novo trackingId
 const createTracking = async (req, res) => {
   try {
-    const { influencerName } = req.body;
+    const { influencerName, sellerPhone} = req.body;
 
-    if (!influencerName) {
+    if (!influencerName || !sellerPhone) {
       return res.status(400).json({ message: "Nome do influenciador é obrigatório." });
     }
 
+    // ✅ Adiciona o código do país se não estiver presente
+    const formattedPhone = sellerPhone.startsWith('+') 
+      ? sellerPhone 
+      : `+55${sellerPhone.replace(/\D/g, '')}`;
+
     const trackingId = nanoid(8);
 
-    const newTracking = await Tracking.create({ influencerName, trackingId, company: req.company._id });
+    const newTracking = await Tracking.create({ influencerName, sellerPhone: formattedPhone, trackingId, company: req.company._id });
+
+    console.log("✅ Tracking criado com sucesso:", newTracking);
 
     return res.status(201).json(newTracking);
   } catch (error) {
     console.error("Erro ao criar trackingId:", error);
-    return res
-      .status(500)
-      .json({ message: "Erro interno ao criar trackingId." });
+    return res.status(500).json({ message: "Erro interno ao criar trackingId." });
   }
 };
 

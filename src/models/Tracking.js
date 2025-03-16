@@ -11,6 +11,10 @@ const trackingSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    sellerPhone: {
+      type: String,
+      required: true, // ✅ Definido como obrigatório
+    },
     company: { 
     type: mongoose.Schema.Types.ObjectId,
     ref: "Company",
