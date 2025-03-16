@@ -271,22 +271,23 @@ const confirmOrder = async (req, res) => {
     console.log("🔹 trackingId recebido:", trackingId);
 
     const order = await Order.findById(orderId);
+    console.log(order);
 
     if (!order) {
       return res.status(404).json({ message: "Pedido não encontrado!" });
     }
 
-    if (!order.isTemporary) {
+    if (!order.isTemporary || order.status == "confirmado") {
       console.warn("⚠️ Este pedido já foi confirmado.");
-      return res
-        .status(200)
-        .json({ message: "Este pedido já foi confirmado." });
+      return res.status(400).json({ message: "Este pedido já foi confirmado." });
     }
 
     const existingOrders = await Order.findOne({
       customer,
       isTemporary: false,
     });
+
+    console.log(existingOrders);
 
     if (!existingOrders) {
       order.trackingId = trackingId;
