@@ -93,7 +93,12 @@ const getCustomerById = async (req, res) => {
 
 const getCustomersByIds = async (req, res) => {
   try {
-    const { ids } = req.params;
+    const { ids } = req.query;
+
+    if (!ids) {
+      return res.status(400).json({ message: 'IDs são obrigatórios.' });
+    }
+    
     const customerIds = ids.split(",").map((id) => id.trim());
 
     const customers = await Customer.find({ _id: { $in: customerIds }, company: req.company._id });

@@ -22,6 +22,8 @@ router.get('/customers/:id', getCustomerById);
 // Rota pra buscar um cliente pelo CPF
 router.get('/customers/cpf/:cpf', getCustomerByCpf);
 
+router.get('/customers/', getCustomersByIds)
+
 // Rota pra buscar vários clientes pelos ids
 router.get('/customers/multiple/:ids', getCustomersByIds);
 
