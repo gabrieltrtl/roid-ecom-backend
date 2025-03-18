@@ -126,6 +126,7 @@ const getCustomerByCpf = async (req, res) => {
       "_id name surname address"
     ); // 🔥 `.lean()` transforma o retorno em um objeto simples
 
+
     if (!customer) {
       return res.status(404).json({ message: "Cliente não encontrado" });
     }
