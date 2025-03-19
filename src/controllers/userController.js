@@ -4,12 +4,19 @@ const jwt = require('jsonwebtoken');
 // Função para logar usuário
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
+  const company = req.company;
 
   try {
+
+    if (!company) {
+      return res.status(400).json({ message: "Empresa não identificada." });
+    }
+
+     // Verifica se o usuário existe nessa empresa
+     const user = await User.findOne({ email, companyId: company._id });
     // Verifica se o usuário existe
-    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: 'Usuário não encontrado' });
+      return res.status(404).json({ message: "Usuário não encontrado para esta empresa." });
     }
 
     // Compara a senha fornecida com a senha armazenada no banco
@@ -19,7 +26,7 @@ const loginUser = async (req, res) => {
     }
 
     // Cria o token JWT
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "8h" });
 
     res.status(200).json({ token });
   } catch (error) {
@@ -33,11 +40,25 @@ const createUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
+    const company = req.company;
+
+    if (!company) {
+      return res.status(400).json({ message: "Empresa não identificada no subdomínio." });
+    }
+
+    // Verifica se o usuário já existe nessa empresa
+    const existingUser = await User.findOne({ email, companyId: company._id });
+
+    if (existingUser) {
+      return res.status(400).json({ message: "Usuário já cadastrado para esta empresa." });
+    }
+
     const newUser = new User({
       name,
       email,
       password,
-      role
+      role,
+      companyId: company._id,
     });
 
     await newUser.save();

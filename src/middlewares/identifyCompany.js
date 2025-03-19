@@ -3,7 +3,7 @@ const Company = require('../models/Company');
 const identifyCompany = async (req, res, next) => {
 
   try {
-    const host = req.headers.host // exemplo empresa1.localhost:3000
+    const host = req.headers.host; // exemplo empresa1.localhost:3000
 
     if (!host) {
       console.log(`❌ Host não encontrado na requisição.`);
