@@ -71,7 +71,15 @@ const createUser = async (req, res) => {
 // Função para listar todos os usuários
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const company = req.company;
+
+    if (!company) {
+      return res.status(400).json({ message: "Empresa não identificada." });
+    }
+
+     // 🔹 Retorna apenas os usuários da empresa logada
+    const users = await User.find({ companyId: company._id });
+
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao listar usuários', error });
@@ -82,8 +90,9 @@ const getAllUsers = async (req, res) => {
 const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await User.findById(id);
+    const company = req.company;
 
+    const user = await User.findOne({ _id: id, companyId: company._id });
     if (!user) {
       return res.status(404).json({ message: 'Usuário não encontrado' });
     }
@@ -99,16 +108,16 @@ const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, email, password, role } = req.body;
+    const company = req.company;
 
-    const updatedUser = await User.findByIdAndUpdate(id, {
-      name,
-      email,
-      password,
-      role
-    }, { new: true });
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: id, companyId: company._id },
+      { name, email, password, role },
+      { new: true }
+    );
 
     if (!updatedUser) {
-      return res.status(404).json({ message: 'Usuário não encontrado' });
+      return res.status(404).json({ message: 'Usuário não encontrado nesta empresa.' });
     }
 
     res.status(200).json(updatedUser);
@@ -121,7 +130,9 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedUser = await User.findByIdAndDelete(id);
+    const company = req.company;
+    
+    const deletedUser = await User.findOneAndDelete({ _id: id, companyId: company._id });
 
     if (!deletedUser) {
       return res.status(404).json({ message: 'Usuário não encontrado' });
