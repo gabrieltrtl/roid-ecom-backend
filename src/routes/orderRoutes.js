@@ -8,7 +8,8 @@ const {
   deleteOrder,
   createTemporaryOrder,
   confirmOrder,
-  getAverageTimeBetweenPurchases
+  getAverageTimeBetweenPurchases,
+  getOrderStatuses
 } = require('../controllers/orderController');
 
 // Rota para criar pedido
@@ -32,6 +33,8 @@ router.put('/orders/:id', updateOrderStatus);
 
 // Deletar pedido
 router.delete('/orders/:id', deleteOrder);   
+
+router.get('/orders/statuses', getOrderStatuses);
 
 
 
