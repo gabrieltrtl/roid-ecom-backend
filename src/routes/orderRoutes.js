@@ -25,6 +25,9 @@ router.put("/orders/confirm/:orderId", confirmOrder);
 // Listar todos os pedidos
 router.get('/orders', getOrders);       
 
+// Listar status disponíveis para pedidos
+router.get('/orders/statuses', getOrderStatuses);
+
 // Obter pedido específico
 router.get('/orders/:id', getOrderById);     
 
@@ -33,9 +36,6 @@ router.put('/orders/:id', updateOrderStatus);
 
 // Deletar pedido
 router.delete('/orders/:id', deleteOrder);   
-
-router.get('/orders/statuses', getOrderStatuses);
-
 
 
 module.exports = router;

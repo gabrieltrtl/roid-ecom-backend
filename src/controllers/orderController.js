@@ -335,7 +335,14 @@ const confirmOrder = async (req, res) => {
 const getOrderStatuses = async (req, res) => {
   try {
     // Captura os status diretamente do modelo ENUM
-    const statuses = Order.schema.path('status').enumValues;
+    const statusField = Order.schema.path('status');
+
+    if (!statusField || !statusField.enumValues) {
+      throw new Error("Os status do pedido não foram encontrados no Model.");
+    }
+
+    // Obtém os valores possíveis do ENUM do Model
+    const statuses = statusField.enumValues;
 
     res.json(statuses);
   } catch (error) {
