@@ -331,6 +331,19 @@ const confirmOrder = async (req, res) => {
   }
 };
 
+// Puxar status disponívels no banco de dados
+const getOrderStatuses = async (req, res) => {
+  try {
+    // Captura os status diretamente do modelo ENUM
+    const statuses = Order.schema.path('status').enumValues;
+
+    res.json(statuses);
+  } catch (error) {
+    console.error("Erro ao buscar os status de pedidos:", error);
+    res.status(500).json({ message: "Erro ao buscar status de pedidos" });
+  }
+};
+
 const getAverageTimeBetweenPurchases = async (req, res) => {
   try {
       const customers = await Order.aggregate([
@@ -381,5 +394,6 @@ module.exports = {
   deleteOrder,
   createTemporaryOrder,
   confirmOrder,
+  getOrderStatuses,
   getAverageTimeBetweenPurchases
 };
