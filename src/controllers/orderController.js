@@ -230,6 +230,8 @@ const createTemporaryOrder = async (req, res) => {
       totalPrice,
     });
 
+
+
     // criar novo pedido temporário no banco de dados
     const newOrder = new Order({
       company: req.company._id,
@@ -297,6 +299,22 @@ const confirmOrder = async (req, res) => {
       console.log(
         "⚠️ Cliente já tem pedidos anteriores. Ignorando trackingId."
       );
+    }
+
+     // Atualizando o estoque
+     for (const item of order.products) {
+      const product = await Product.findById(item.product); // Encontre o produto no banco
+      if (product) {
+        if (product.stock >= item.quantity) {
+          product.stock -= item.quantity; // Diminui a quantidade do produto
+          await product.save(); // Salva a alteração no banco
+          console.log(`✅ Estoque do produto ${product.name} atualizado: ${product.stock}`);
+        } else {
+          return res.status(400).json({ message: `Estoque insuficiente para o produto ${product.name}.` });
+        }
+      } else {
+        return res.status(404).json({ message: `Produto com ID ${item.product} não encontrado.` });
+      }
     }
 
     order.isTemporary = false; // Marca como confirmado

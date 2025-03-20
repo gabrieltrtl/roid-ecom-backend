@@ -15,6 +15,7 @@ const {
 router.post('/orders', createOrder);     
 
 router.get('/orders/average-time-between-purchases', getAverageTimeBetweenPurchases)
+
 // Rota para criar pedido temporário
 router.post('/orders/temporary', createTemporaryOrder);
 
