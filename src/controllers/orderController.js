@@ -238,7 +238,7 @@ const createTemporaryOrder = async (req, res) => {
       products: formattedProducts,
       discountRule: discountRuleId,
       totalPrice,
-      status: "pendente",
+      status: "PENDENTE",
       isTemporary: true,
     });
 
