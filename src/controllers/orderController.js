@@ -88,14 +88,29 @@ const createOrder = async (req, res) => {
 };
 
 // Função para listar todos os pedidos
+// Função para listar todos os pedidos com suporte a filtro de data
 const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ company: req.company._id }).populate("customer", "name surname email");
+    const { startDate, endDate } = req.query;
+
+    const filter = {
+      company: req.company._id
+    };
+
+    if (startDate && endDate) {
+      filter.createdAt = {
+        $gte: new Date(startDate + 'T00:00:00.000Z'),
+        $lte: new Date(endDate + 'T23:59:59.999Z'),
+      };
+    }
+
+    const orders = await Order.find(filter).populate("customer", "name surname email");
     res.status(200).json(orders);
   } catch (error) {
     res.status(500).json({ message: "Erro ao buscar pedidos", error });
   }
 };
+
 
 // Função para obter um pedido específico
 const getOrderById = async (req, res) => {
