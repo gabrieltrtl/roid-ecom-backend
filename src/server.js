@@ -12,6 +12,7 @@ const userRoutes = require('./routes/userRoutes');
 const trackingRoutes = require('./routes/trackingRoutes');
 const discountRulesRoutes = require('./routes/discountRulesRoutes');
 const companyRoutes = require('./routes/companyRoutes');
+const shippingPoliciesRoutes = require('./routes/shippingPoliciesRoutes');
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use('/api', productRoutes);  // Usa as rotas de produtos sob o prefixo /api
 app.use('/api', userRoutes);
 app.use('/api', trackingRoutes);
 app.use('/api', discountRulesRoutes);
+app.use('/api', shippingPoliciesRoutes);
 
 
 // Iniciar o Servidor
