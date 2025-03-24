@@ -2,6 +2,7 @@ const Company = require('../models/Company');
 
 const identifyCompany = async (req, res, next) => {
   try {
+    console.log('🛡️ Middleware identifyCompany executado para:', req.headers.host);
     const host = req.headers.host; // Exemplo: empresa1.bulkcrm.com
 
     if (!host) {
