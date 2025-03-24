@@ -10,7 +10,7 @@ const discountRuleSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['percentage', 'fixed'],
+    enum: ['percentage', 'fixed', 'override'],
     required: true,
   },
   value: {

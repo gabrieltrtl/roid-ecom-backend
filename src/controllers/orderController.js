@@ -192,7 +192,7 @@ const createTemporaryOrder = async (req, res) => {
 
     let discountRule = null;
     if (discountRuleId) {
-      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company: req.company._id }); // ✅ Garantia que a regra pertence à empresa
+      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company: req.company._id });
       if (!discountRule) {
         console.error(`❌ Regra de desconto com ID ${discountRuleId} não encontrada.`);
         return res.status(404).json({ message: "Regra de desconto não encontrada!" });
@@ -220,6 +220,8 @@ const createTemporaryOrder = async (req, res) => {
             productPrice -= (productPrice * discountRule.value) / 100;
           } else if (discountRule.type === 'fixed') {
             productPrice -= discountRule.value;
+          } else if (discountRule.type === 'override') {
+            productPrice = discountRule.value;
           }
 
           if (productPrice < 0) productPrice = 0;
