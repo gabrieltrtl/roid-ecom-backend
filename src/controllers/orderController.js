@@ -116,7 +116,13 @@ const getOrders = async (req, res) => {
 const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
-    const order = await Order.findById(id).populate("customer").populate("discountRule");
+    const order = await Order.findById(id)
+      .populate('customer')
+      .populate('discountRule')
+      .populate({
+        path: 'products.product',   // 🔥 popula o campo correto
+        model: 'Product'            // 💡 certifique-se que o model realmente se chama 'Product'
+      });
 
     if (!order) {
       return res.status(404).json({ message: "Pedido não encontrado" });
