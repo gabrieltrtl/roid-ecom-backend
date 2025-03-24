@@ -296,7 +296,7 @@ const confirmOrder = async (req, res) => {
       return res.status(404).json({ message: "Pedido não encontrado!" });
     }
 
-    if (!order.isTemporary || order.status == "confirmado") {
+    if (!order.isTemporary || order.status == "CONFIRMADO") {
       console.warn("⚠️ Este pedido já foi confirmado.");
       return res.status(400).json({ message: "Este pedido já foi confirmado." });
     }
@@ -335,7 +335,7 @@ const confirmOrder = async (req, res) => {
     }
 
     order.isTemporary = false; // Marca como confirmado
-    order.status = "confirmado"; // atualiza o status
+    order.status = "CONFIRMADO"; // atualiza o status
     order.address = address; // Atualiza o endereço
     order.customer = customer;
 

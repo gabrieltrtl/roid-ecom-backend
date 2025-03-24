@@ -16,9 +16,11 @@ router.post('/customers', createCustomer);
 // Rota para listar todos os clientes
 router.get('/customers', getAllCustomers);
 
+// Rota para buscar cliente por CPF
+router.get('/customers/cpf/:cpf', getCustomerByCpf); // ✅ ESTA LINHA!
+
 // Rota para buscar um cliente pelo ID
 router.get('/customers/:id', getCustomerById);
-
 
 router.get('/customers/', getCustomersByIds)
 

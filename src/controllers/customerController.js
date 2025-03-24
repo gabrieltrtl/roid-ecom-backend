@@ -114,32 +114,37 @@ const getCustomersByIds = async (req, res) => {
 };
 
 const getCustomerByCpf = async (req, res) => {
-  let { cpf } = req.params; // Obtemos CPF da URL
-  console.log("🔍 CPF recebido na API:", cpf);
-  // 🔥 Remove qualquer caractere especial antes de buscar no banco
+  let { cpf } = req.params;
   cpf = cpf.replace(/\D/g, "").trim();
 
   console.log("🔍 CPF formatado para busca:", cpf);
+  console.log("🏢 Empresa identificada no req:", req.company);
 
   try {
-    const customer = await Customer.findOne({ cpf, company: req.company._id }).select(
-      "_id name surname address"
-    ); // 🔥 `.lean()` transforma o retorno em um objeto simples
+    // 🧪 Teste com regex — insira isso AQUI 👇
+    const customers = await Customer.find({
+      cpf: { $regex: cpf, $options: "i" }
+    });
+    console.log("🧪 Clientes encontrados com regex:", customers);
 
+    customers.forEach((c) => {
+      console.log("🧪 CPF no banco:", c.cpf, "| typeof:", typeof c.cpf, "| length:", c.cpf.length);
+    });
+
+    // (mantenha sua query original aqui embaixo)
+    const customer = await Customer.findOne({
+      cpf,
+      company: req.company._id
+    }).select("_id name surname address");
 
     if (!customer) {
       return res.status(404).json({ message: "Cliente não encontrado" });
     }
 
-    return res.status(200).json({
-      _id: customer._id.toString(),
-      name: customer.name,
-      surname: customer.surname,
-      address: customer.address, // Supondo que o modelo Customer tenha um campo 'address'
-    });
+    return res.status(200).json(customer);
   } catch (error) {
-    console.error("Erro ao buscar cliente:", error);
-    return res.status(500).json({ message: "Erro ao buscar cliente" });
+    console.error("❌ Erro ao buscar cliente:", error);
+    return res.status(500).json({ message: "Erro ao buscar cliente", error });
   }
 };
 

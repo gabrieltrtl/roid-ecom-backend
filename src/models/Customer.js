@@ -50,7 +50,6 @@ const CustomerSchema = new mongoose.Schema({
   cpf: { 
     type: String, 
     required: true, 
-    unique: true,
     validate: {
       validator: validarCPF,
       message: 'CPF inválido!'
