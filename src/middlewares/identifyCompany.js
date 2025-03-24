@@ -1,30 +1,29 @@
-// backend/src/middlewares/identifyCompany.js
 const Company = require('../models/Company');
 
 const identifyCompany = async (req, res, next) => {
   try {
-    const host = req.headers.host; // Exemplo: empresa1.localhost:3000
+    const host = req.headers.host; // Exemplo: empresa1.bulkcrm.com
 
     if (!host) {
       console.log(`❌ Host não encontrado na requisição.`);
       return res.status(400).json({ message: "Host não encontrado na requisição." });
     }
 
-    // Ignora verificação de subdomínio em ambiente de dev local (opcional)
-    if (process.env.NODE_ENV === 'development' && host.startsWith('localhost')) {
-      console.log('⚙️ Ambiente de desenvolvimento - ignorando subdomínio.');
+    // Permitir acesso sem subdomínio em dev (localhost:3000)
+    if (process.env.NODE_ENV === 'development' && host.includes('localhost')) {
+      console.log('⚙️ Ambiente dev - ignorando subdomínio.');
       return next();
     }
 
-    const hostParts = host.split('.');
-    
-    // Se tiver "localhost:3000", hostParts pode ser ['empresa1', 'localhost:3000']
-    if (hostParts.length < 2) {
-      console.log(`❌ Subdomínio inválido: ${host}`);
-      return res.status(400).json({ message: "Subdomínio inválido." });
+    const domain = 'bulkcrm.com'; // 🛑 Altere para seu domínio real
+    const subdomain = host.replace(`.${domain}`, '').split(':')[0]; // Remove domínio e porta
+
+    // Se o resultado for igual ao domínio, é acesso direto (sem subdomínio)
+    if (!subdomain || subdomain === domain) {
+      console.log(`❌ Subdomínio inválido ou ausente: ${host}`);
+      return res.status(400).json({ message: "Subdomínio ausente ou inválido." });
     }
 
-    const subdomain = hostParts[0]; // Ex: empresa1
     console.log(`🔍 Subdomínio identificado: ${subdomain}`);
 
     const company = await Company.findOne({ domain: subdomain });
@@ -34,8 +33,8 @@ const identifyCompany = async (req, res, next) => {
       return res.status(403).json({ message: "Subdomínio não autorizado." });
     }
 
-    req.company = company; // 🔥 Empresa disponível nos controllers
-    console.log("🏢 Empresa identificada no middleware:", req.company);
+    req.company = company;
+    console.log("🏢 Empresa identificada no middleware:", req.company.name);
     next();
   } catch (error) {
     console.error("❌ Erro ao identificar empresa:", error);
