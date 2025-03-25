@@ -56,6 +56,7 @@ const OrderSchema = new mongoose.Schema({
   }, // Tipo de frete
   isTemporary: { type: Boolean, required: false }, 
   trackingId: { type: String, default: null }, // 🔹 Garante que trackingId pode ser salvo
+  trackingCode: { type: String, default: null },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', OrderSchema);

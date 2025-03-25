@@ -416,6 +416,35 @@ const getAverageTimeBetweenPurchases = async (req, res) => {
   }
 };
 
+const updateTrackingCode = async (req, res) => {
+  const { id } = req.params;
+  const { trackingCode } = req.body;
+
+  if (!trackingCode) {
+    return res.status(400).json({ error: "O código de rastreio é obrigatório." });
+  }
+
+  try {
+    const updatedOrder = await Order.findOneAndUpdate(
+      { _id: id, company: req.company._id },
+      {
+        trackingCode,
+        status: "ENVIADO", // ✅ Atualiza o status também
+      },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ error: "Pedido não encontrado." });
+    }
+
+    res.status(200).json(updatedOrder);
+  } catch (error) {
+    console.error("Erro ao atualizar código de rastreio:", error);
+    res.status(500).json({ error: "Erro interno ao atualizar o pedido." });
+  }
+};
+
 module.exports = {
   createOrder,
   getOrders,
@@ -425,5 +454,6 @@ module.exports = {
   createTemporaryOrder,
   confirmOrder,
   getOrderStatuses,
-  getAverageTimeBetweenPurchases
+  getAverageTimeBetweenPurchases,
+  updateTrackingCode
 };
