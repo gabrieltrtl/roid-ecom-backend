@@ -3,9 +3,9 @@ const { createCompany, getAllCompanies } = require('../controllers/CompanyContro
 const router = express.Router();
 
 // ✅ Rota para criar uma empresa
-router.post('/companies', createCompany);
+router.post('/', createCompany);
 
 // ✅ Rota para listar empresas (opcional para teste)
-router.get('/companies', getAllCompanies);
+router.get('/', getAllCompanies);
 
 module.exports = router;

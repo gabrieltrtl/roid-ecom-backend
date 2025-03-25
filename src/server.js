@@ -28,7 +28,7 @@ app.get('/', (req, res) => {
   res.send('Api Rodando!')
 });
 
-app.use('/api', companyRoutes);
+app.use('/companies', companyRoutes);
 
 app.use(identifyCompany);
 
