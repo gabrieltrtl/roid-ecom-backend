@@ -35,7 +35,7 @@ router.get('/orders/:id', getOrderById);
 // Atualizar status do pedido
 router.put('/orders/:id', updateOrderStatus); 
 
-router.patch('/:id/tracking-code', updateTrackingCode); 
+router.patch('/orders/:id/tracking-code', updateTrackingCode); 
 
 // Deletar pedido
 router.delete('/orders/:id', deleteOrder);   
