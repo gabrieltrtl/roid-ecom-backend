@@ -47,7 +47,7 @@ const createUser = async (req, res) => {
     }
 
     // Verifica se o usuário já existe nessa empresa
-    const existingUser = await User.findOne({ email, companyId: company._id });
+    const existingUser = await User.findOne({ email, companyId: req.company._id });
 
     if (existingUser) {
       return res.status(400).json({ message: "Usuário já cadastrado para esta empresa." });
@@ -58,7 +58,7 @@ const createUser = async (req, res) => {
       email,
       password,
       role,
-      companyId: company._id,
+      companyId: req.company._id,
     });
 
     await newUser.save();
