@@ -38,6 +38,9 @@ const loginUser = async (req, res) => {
 // Função para criar um usuário
 const createUser = async (req, res) => {
   try {
+
+    console.log("📥 Dados recebidos:", req.body);
+    console.log("📥 Tipo da senha recebida:", typeof req.body.password);
     const { name, email, password, role } = req.body;
 
     const company = req.company;
