@@ -36,6 +36,7 @@ app.use(cors({
 
 // Adicionar este middleware para garantir que OPTIONS seja tratado antes de todas as rotas
 app.options('*', (req, res) => {
+  console.log("❓ Preflight OPTIONS recebido: ", req.headers); 
   res.setHeader('Access-Control-Allow-Origin', '*'); // Substitua '*' pelo seu domínio específico
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -51,7 +52,7 @@ app.get('/', (req, res) => {
   res.send('Api Rodando!')
 });
 
-app.use('/companies', companyRoutes);
+app.use('/api', companyRoutes);
 
 app.use(identifyCompany);
 

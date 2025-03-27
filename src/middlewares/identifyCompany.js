@@ -2,7 +2,7 @@ const Company = require('../models/Company');
 
 const identifyCompany = async (req, res, next) => {
   try {
-    const host = req.headers.host; // Exemplo: empresa1.bulkcrm.com ou bulkcrm.com
+    const host = req.headers.host; 
 
     if (!host) {
       console.log(`❌ Host não encontrado na requisição.`);
@@ -17,7 +17,7 @@ const identifyCompany = async (req, res, next) => {
 
     const hostParts = host.split('.');
 
-    // 💡 NOVO: Caso o host seja o domínio principal (bulkcrm.com)
+   
     if (hostParts.length === 2 && hostParts[1] === 'com' && hostParts[0] === 'bulkcrm') {
       console.log(`🔍 Dominio principal identificado: ${host}`);
       // Trate como o domínio principal
