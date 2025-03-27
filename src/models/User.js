@@ -18,19 +18,27 @@ UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
   try {
-    // 🔐 Força a conversão para string e valida
-    const rawPassword = String(this.password).trim();
-
-    if (!rawPassword || rawPassword.length < 6) {
-      return next(new Error('Senha inválida. Deve ser uma string com no mínimo 6 caracteres.'));
+    // 🔒 Verifica se a senha existe
+    if (!this.password) {
+      return next(new Error('Senha não fornecida.'));
     }
 
-    this.password = await bcrypt.hash(rawPassword, 10);
+    // 🔁 Converte para string, se ainda não for
+    const rawPassword = typeof this.password === 'string' ? this.password : String(this.password);
+
+    // ✅ Valida se a string está ok
+    if (!rawPassword || rawPassword.trim().length < 6) {
+      return next(new Error('Senha inválida. Deve ter pelo menos 6 caracteres.'));
+    }
+
+    // 🔐 Aplica hash com bcrypt
+    this.password = await bcrypt.hash(rawPassword.trim(), 10);
     next();
   } catch (err) {
     next(err);
   }
 });
+
 
 // Método para comparar senhas
 UserSchema.methods.comparePassword = async function (password) {
