@@ -33,7 +33,15 @@ app.use(cors({
   credentials: true,
 }));
 
-app.options('*', cors());
+// Adicionar este middleware para garantir que OPTIONS seja tratado antes de todas as rotas
+app.options('*', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Substitua '*' pelo seu domínio específico
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.status(204).end(); // 204 é o status adequado para resposta OPTIONS
+});
+
 
 app.use(express.json());
 
