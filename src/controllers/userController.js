@@ -64,7 +64,17 @@ const createUser = async (req, res) => {
     await newUser.save();
     res.status(201).json(newUser);
   } catch (error) {
-    res.status(500).json({ message: 'Erro ao criar usuário', error });
+    console.error("❌ Erro ao criar usuário:", error);
+
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "E-mail já cadastrado para esta empresa." });
+    }
+
+    res.status(500).json({
+      message: 'Erro ao criar usuário',
+      error: error.message,
+      stack: error.stack,
+    });
   }
 };
 
