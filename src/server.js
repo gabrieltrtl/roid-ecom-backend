@@ -22,6 +22,7 @@ conectarDB();
 // Middlewares 
 app.use(cors({
   origin: (origin, callback) => {
+    console.log("❓ Origem detectada: ", origin);
     if (!origin || /.*\.bulkcrm\.com$/.test(origin)) {
       callback(null, true); // Permite a requisição
     } else {
