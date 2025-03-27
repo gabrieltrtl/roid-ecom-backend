@@ -20,7 +20,6 @@ const app = express();
 conectarDB();
 
 // Middlewares 
-app.use(express.json());
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || /.*\.bulkcrm\.com$/.test(origin)) {
@@ -36,6 +35,7 @@ app.use(cors({
 
 app.options('*', cors());
 
+app.use(express.json());
 
 // Rota de Teste
 app.get('/', (req, res) => {
