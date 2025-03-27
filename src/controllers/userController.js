@@ -46,6 +46,13 @@ const createUser = async (req, res) => {
       return res.status(400).json({ message: "Empresa não identificada no subdomínio." });
     }
 
+    // 🔐 Converte e valida a senha
+    const stringPassword = String(password).trim();
+
+    if (!stringPassword || stringPassword.length < 6) {
+      return res.status(400).json({ message: "Senha inválida. Deve ter pelo menos 6 caracteres." });
+    }
+
     // Verifica se o usuário já existe nessa empresa
     const existingUser = await User.findOne({ email, companyId: company._id });
 
@@ -56,7 +63,7 @@ const createUser = async (req, res) => {
     const newUser = new User({
       name,
       email,
-      password,
+      password: stringPassword,
       role,
       companyId: company._id,
     });
