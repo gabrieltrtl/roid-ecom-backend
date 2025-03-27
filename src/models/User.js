@@ -16,8 +16,20 @@ const UserSchema = new mongoose.Schema({
 // Hash da senha antes de salvar
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
+
+  try {
+    // 🔐 Força a conversão para string e valida
+    const rawPassword = String(this.password).trim();
+
+    if (!rawPassword || rawPassword.length < 6) {
+      return next(new Error('Senha inválida. Deve ser uma string com no mínimo 6 caracteres.'));
+    }
+
+    this.password = await bcrypt.hash(rawPassword, 10);
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Método para comparar senhas
