@@ -1,9 +1,8 @@
-// backend/src/middlewares/identifyCompany.js
 const Company = require('../models/Company');
 
 const identifyCompany = async (req, res, next) => {
   try {
-    const host = req.headers.host; // Exemplo: empresa1.localhost:3000
+    const host = req.headers.host; // Exemplo: empresa1.bulkcrm.com ou bulkcrm.com
 
     if (!host) {
       console.log(`❌ Host não encontrado na requisição.`);
@@ -17,8 +16,15 @@ const identifyCompany = async (req, res, next) => {
     }
 
     const hostParts = host.split('.');
-    
-    // Se tiver "localhost:3000", hostParts pode ser ['empresa1', 'localhost:3000']
+
+    // 💡 NOVO: Caso o host seja o domínio principal (bulkcrm.com)
+    if (hostParts.length === 2 && hostParts[1] === 'com' && hostParts[0] === 'bulkcrm') {
+      console.log(`🔍 Dominio principal identificado: ${host}`);
+      // Trate como o domínio principal
+      return next(); // ✅ Permite seguir sem validar o subdomínio
+    }
+
+    // ⚠️ SE NÃO HOUVER SUBDOMÍNIO VÁLIDO: Se o host não tiver um subdomínio válido
     if (hostParts.length < 2) {
       console.log(`❌ Subdomínio inválido: ${host}`);
       return res.status(400).json({ message: "Subdomínio inválido." });
@@ -27,6 +33,7 @@ const identifyCompany = async (req, res, next) => {
     const subdomain = hostParts[0]; // Ex: empresa1
     console.log(`🔍 Subdomínio identificado: ${subdomain}`);
 
+    // 💡 NOVO: Verifique a empresa com o subdomínio
     const company = await Company.findOne({ domain: subdomain });
 
     if (!company) {
