@@ -21,7 +21,21 @@ conectarDB();
 
 // Middlewares 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || /.*\.bulkcrm\.com$/.test(origin)) {
+      callback(null, true); // Permite a requisição
+    } else {
+      callback(new Error('Not allowed by CORS')); // Bloqueia requisição de domínios não permitidos
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Adiciona OPTIONS
+  allowedHeaders: ['Content-Type', 'Authorization'], // Permite os cabeçalhos necessários
+  credentials: true,
+}));
+
+app.options('*', cors());
+
 
 // Rota de Teste
 app.get('/', (req, res) => {
