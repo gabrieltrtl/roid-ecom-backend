@@ -24,7 +24,11 @@ UserSchema.pre('save', async function (next) {
     }
 
     // 🔁 Converte para string, se ainda não for
-    const rawPassword = typeof this.password === 'string' ? this.password : String(this.password);
+    if (typeof this.password !== 'string') {
+      return next(new Error('Senha inválida. Deve ser uma string.'));
+    }
+    
+    const rawPassword = this.password.trim();
 
     // ✅ Valida se a string está ok
     if (!rawPassword || rawPassword.trim().length < 6) {
