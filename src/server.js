@@ -23,14 +23,22 @@ conectarDB();
 app.use(cors({
   origin: (origin, callback) => {
     console.log("❓ Origem detectada: ", origin);
-    if (!origin || /.*\.bulkcrm\.com$/.test(origin)) {
-      callback(null, true); // Permite a requisição
+
+    const allowed = [
+      /.*\.bulkcrm\.com$/,        // Produção
+      /.*\.localhost:\d+$/        // Subdomínios locais com porta (ex: empresa1.localhost:5173)
+    ];
+
+    const isAllowed = allowed.some((regex) => regex.test(origin));
+
+    if (!origin || isAllowed) {
+      callback(null, true); // ✅ Libera
     } else {
-      callback(new Error('Not allowed by CORS')); // Bloqueia requisição de domínios não permitidos
+      callback(new Error('Not allowed by CORS')); // ❌ Bloqueia
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Adiciona OPTIONS
-  allowedHeaders: ['Content-Type', 'Authorization'], // Permite os cabeçalhos necessários
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }));
 
