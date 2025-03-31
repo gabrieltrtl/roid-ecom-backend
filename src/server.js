@@ -20,6 +20,7 @@ const app = express();
 conectarDB();
 
 // Middlewares 
+// Middlewares 
 app.use(cors({
   origin: (origin, callback) => {
     console.log("❓ Origem detectada: ", origin);
@@ -38,9 +39,13 @@ app.use(cors({
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  
+  // ✅ Adicionado o header 'tracking-id' aqui:
+  allowedHeaders: ['Content-Type', 'Authorization', 'tracking-id'],
+
   credentials: true,
 }));
+
 
 // Adicionar este middleware para garantir que OPTIONS seja tratado antes de todas as rotas
 app.options('*', (req, res) => {
