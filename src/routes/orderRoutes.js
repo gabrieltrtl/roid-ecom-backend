@@ -10,7 +10,8 @@ const {
   confirmOrder,
   getAverageTimeBetweenPurchases,
   getOrderStatuses,
-  updateTrackingCode
+  updateTrackingCode,
+  cancelOrder
 } = require('../controllers/orderController');
 
 // Rota para criar pedido
@@ -21,7 +22,7 @@ router.get('/orders/average-time-between-purchases', getAverageTimeBetweenPurcha
 // Rota para criar pedido temporário
 router.post('/orders/temporary', createTemporaryOrder);
 
-router.put("/orders/confirm/:orderId", confirmOrder);
+router.put('/orders/confirm/:orderId', confirmOrder);
 
 // Listar todos os pedidos
 router.get('/orders', getOrders);       
@@ -38,7 +39,11 @@ router.put('/orders/:id', updateOrderStatus);
 router.patch('/orders/:id/tracking-code', updateTrackingCode); 
 
 // Deletar pedido
-router.delete('/orders/:id', deleteOrder);   
+router.delete('/orders/:id', deleteOrder);  
+
+// Cancelar pedido
+router.put('/orders/cancel/:id', cancelOrder);
+
 
 
 module.exports = router;

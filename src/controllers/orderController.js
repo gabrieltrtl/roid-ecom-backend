@@ -445,6 +445,37 @@ const updateTrackingCode = async (req, res) => {
   }
 };
 
+const cancelOrder = async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    console.log("🟡 Cancelando pedido ID:", orderId);
+    console.log("Empresa:", req.company?._id); // ← importante no multi-tenant
+
+    const order = await Order.findOne({ _id: orderId, company: req.company._id });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Pedido não encontrado' });
+    }
+
+    // 🧹 Limpa os dados do pedido e marca como CANCELADO
+    order.status = 'CANCELADO';
+    order.totalPrice = 0;
+    order.products = [];
+    order.discountRule = null;
+    order.shippingPolicy = null;
+    order.trackingId = null;
+    order.trackingCode = null;
+    order.orderId = `CANCELADO-${Date.now()}`;; // ou `CANCELADO_123` se quiser manter ID visível
+
+    await order.save();
+
+    return res.status(200).json(order);
+  } catch (error) {
+    console.error('Erro ao cancelar pedido:', error);
+    return res.status(500).json({ message: 'Erro interno ao cancelar o pedido' });
+  }
+}
+
 module.exports = {
   createOrder,
   getOrders,
@@ -455,5 +486,6 @@ module.exports = {
   confirmOrder,
   getOrderStatuses,
   getAverageTimeBetweenPurchases,
-  updateTrackingCode
+  updateTrackingCode,
+  cancelOrder
 };
