@@ -40,8 +40,15 @@ const createUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    if (!req.companyId) {
-      return res.status(400).json({ message: "Empresa não identificada no token." });
+    if (!role) {
+      return res.status(400).json({ message: "O campo role é obrigatório." });
+    }
+
+    let companyId = req.companyId; // padrão: usa o companyId da requisição
+
+     // 🚨 Se for superadmin, não precisa de companyId
+     if (role === 'superadmin') {
+      companyId = undefined;
     }
 
     // 🔐 Converte e valida a senha
@@ -51,8 +58,18 @@ const createUser = async (req, res) => {
       return res.status(400).json({ message: "Senha inválida. Deve ter pelo menos 6 caracteres." });
     }
 
+    if (role !== 'superadmin' && !companyId) {
+      return res.status(400).json({ message: "Empresa não identificada. companyId obrigatório para este tipo de usuário." });
+    }
+
+    // 🚨 Verifica se o e-mail já existe (considerando companyId se não for superadmin)
+    const existingQuery = { email };
+    if (role !== 'superadmin') {
+      existingQuery.companyId = companyId;
+    }
+
     // Verifica se o usuário já existe nessa empresa
-    const existingUser = await User.findOne({ email, companyId: req.companyId });
+    const existingUser = await User.findOne(existingQuery);
 
     if (existingUser) {
       return res.status(400).json({ message: "Usuário já cadastrado para esta empresa." });
@@ -63,7 +80,7 @@ const createUser = async (req, res) => {
       email,
       password: stringPassword,
       role,
-      companyId: req.companyId,
+      companyId: companyId || undefined, // ⚡ Só passa se existir
     });
 
     await newUser.save();
