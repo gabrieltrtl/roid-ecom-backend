@@ -1,6 +1,7 @@
 const express = require('express');
 const { createCompany, getAllCompanies } = require('../controllers/CompanyController')
 const router = express.Router();
+const isSuperAdmin = require('../middlewares/isSuperAdmin');
 
 // ✅ Rota para criar uma empresa
 router.post('/', createCompany);

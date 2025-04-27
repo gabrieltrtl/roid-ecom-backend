@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const identifyCompany = require('../middlewares/identifyCompany');
+const isSuperAdmin = require('../middlewares/isSuperAdmin');
 const { 
   loginUser,
   createUser,
@@ -14,7 +15,7 @@ const {
 router.post('/login', loginUser);
 
 // Rota para criar um usuário
-router.post('/', identifyCompany, createUser);
+router.post('/', identifyCompany, isSuperAdmin, createUser);
 
 // Rota para listar todos os usuários
 router.get('/', identifyCompany, getAllUsers);
