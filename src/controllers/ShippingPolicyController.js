@@ -2,7 +2,7 @@ const ShippingPolicy = require('../models/ShippingPolicy');
 
 const getAllShippingPolicies = async (req, res) => {
   try {
-    const policies = await ShippingPolicy.find({ company: req.company._id }).sort({ createdAt: -1 });
+    const policies = await ShippingPolicy.find({ company: req.companyId }).sort({ createdAt: -1 });
     res.json(policies);
   } catch (error) {
     console.error('Erro ao buscar políticas de frete:', error);
@@ -13,7 +13,7 @@ const getAllShippingPolicies = async (req, res) => {
 const createShippingPolicy = async (req, res) => {
   try {
     const { name, price } = req.body;
-    const policy = new ShippingPolicy({ name, price, company: req.company._id });
+    const policy = new ShippingPolicy({ name, price, company: req.companyId });
 
     if (!name || price == null) {
       return res.status(400).json({ message: 'Nome e preço são obrigatórios.' });
@@ -36,7 +36,7 @@ const updateShippingPolicy = async (req, res) => {
     }
 
    const updatedPolicy = await ShippingPolicy.findOneAndUpdate(
-      { _id: req.params.id, company: req.company._id },
+      { _id: req.params.id, company: req.companyId },
       { name, price },
       { new: true }
     );
@@ -54,7 +54,7 @@ const deleteShippingPolicy = async (req, res) => {
   try {
     const deleted = await ShippingPolicy.findOneAndDelete({
       _id: req.params.id,
-      company: req.company._id
+      company: req.companyId
     });
 
     if (!deleted) return res.status(404).json({ message: 'Política não encontrada.' });

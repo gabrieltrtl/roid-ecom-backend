@@ -11,7 +11,7 @@ const createProduct = async (req, res) => {
       price,
       stock,
       images,
-      company: req.company._id
+      company: req.companyId
     });
 
     await newProduct.save();  // Salva o novo produto no banco de dados
@@ -24,7 +24,7 @@ const createProduct = async (req, res) => {
 // Função para listar todos os produtos
 const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find({ company: req.company._id });
+    const products = await Product.find({ company: req.companyId });
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao listar produtos', error });
@@ -36,7 +36,7 @@ const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const product = await Product.findOne({ _id: id, company: req.company._id });
+    const product = await Product.findOne({ _id: id, company: req.companyId });
 
     if (!product) {
       // Retorna erro se o produto não for encontrado ou não pertencer à empresa
@@ -56,7 +56,7 @@ const updateProduct = async (req, res) => {
     const { name, description, price, images, stock } = req.body;  // Pega os dados do produto
 
     const updatedProduct = await Product.findOneAndUpdate(
-      { _id: id, company: req.company._id},
+      { _id: id, company: req.companyId},
       { name, description, price, stock, images },
       { new: true }
     );  // Atualiza o produto e retorna a versão mais recente
@@ -77,7 +77,7 @@ const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;  // Pega o ID do produto da URL
 
-    const deletedProduct = await Product.findOneAndDelete({ _id: id, company: req.company._id });  // Deleta o produto
+    const deletedProduct = await Product.findOneAndDelete({ _id: id, company: req.companyId });  // Deleta o produto
 
     if (!deletedProduct) {
       // Retorna erro se o produto não for encontrado ou não pertencer à empresa

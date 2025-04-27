@@ -20,7 +20,7 @@ const createCustomer = async (req, res) => {
     }
 
     // Verificar se o cliente já existe pelo CPF ou email
-    const existingCustomer = await Customer.findOne({ cpf: formattedCpf, company: req.company._id });
+    const existingCustomer = await Customer.findOne({ cpf: formattedCpf, company: req.companyId });
 
     if (existingCustomer) {
       return res.status(400).json({ message: "Cliente já cadastrado!" });
@@ -41,7 +41,7 @@ const createCustomer = async (req, res) => {
         city: address.city,
         state: address.state,
       },
-      company: req.company._id
+      company: req.companyId
     };
 
     
@@ -68,7 +68,7 @@ const createCustomer = async (req, res) => {
 // Função para listar todos os clientes
 const getAllCustomers = async (req, res) => {
   try {
-    const customers = await Customer.find({ company: req.company._id });
+    const customers = await Customer.find({ company: req.companyId });
     res.status(200).json(customers);
   } catch (error) {
     res.status(500).json({ message: "Erro ao listar clientes", error });
@@ -80,7 +80,7 @@ const getCustomerById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const customer = await Customer.findOne({ _id: id, company: req.company._id }); // ✅ Usa o company do middleware
+    const customer = await Customer.findOne({ _id: id, company: req.companyId }); // ✅ Usa o company do middleware
 
     if (!customer) {
       return res.status(404).json({ message: "Cliente não encontrado!" });
@@ -101,7 +101,7 @@ const getCustomersByIds = async (req, res) => {
     
     const customerIds = ids.split(",").map((id) => id.trim());
 
-    const customers = await Customer.find({ _id: { $in: customerIds }, company: req.company._id });
+    const customers = await Customer.find({ _id: { $in: customerIds }, company: req.companyId });
 
     if (!customers || customers.length === 0) {
       return res.status(404).json({ message: "Nenhum cliente encontrado!" });
@@ -134,7 +134,7 @@ const getCustomerByCpf = async (req, res) => {
     // (mantenha sua query original aqui embaixo)
     const customer = await Customer.findOne({
       cpf,
-      company: req.company._id
+      company: req.companyId
     }).select("_id name surname address");
 
     if (!customer) {
@@ -155,7 +155,7 @@ const updateCustomer = async (req, res) => {
     const { ...updateData } = req.body;
 
     const updatedCustomer = await Customer.findOneAndUpdate(
-      { _id: id, company: req.company._id },
+      { _id: id, company: req.companyId },
       updateData,
       { new: true }
     );
@@ -176,7 +176,7 @@ const updateCustomer = async (req, res) => {
 const deleteCustomer = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedCustomer = await Customer.findOneAndDelete({ _id: id, company: req.company._id });
+    const deletedCustomer = await Customer.findOneAndDelete({ _id: id, company: req.companyId });
 
     if (!deletedCustomer) {
       return res.status(404).json({ message: "Cliente não encontrado para esta empresa!" });

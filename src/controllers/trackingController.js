@@ -17,7 +17,7 @@ const createTracking = async (req, res) => {
 
     const trackingId = nanoid(8);
 
-    const newTracking = await Tracking.create({ influencerName, sellerPhone: formattedPhone, trackingId, company: req.company._id });
+    const newTracking = await Tracking.create({ influencerName, sellerPhone: formattedPhone, trackingId, company: req.companyId });
 
     console.log("✅ Tracking criado com sucesso:", newTracking);
 
@@ -31,7 +31,7 @@ const createTracking = async (req, res) => {
 // Listar todos os trackings
 const getAllTrackings = async (req, res) => {
   try {
-    const trackings = await Tracking.find({ company: req.company._id }); 
+    const trackings = await Tracking.find({ company: req.companyId }); 
     return res.status(200).json(trackings);
   } catch (error) {
     console.error("Erro ao buscar trackingIds:", error);
@@ -44,7 +44,7 @@ const getTracking = async (req, res) => {
   const { trackingId } = req.params;
 
   try {
-    const tracking = await Tracking.findOne({ trackingId, company: req.company._id });
+    const tracking = await Tracking.findOne({ trackingId, company: req.companyId });
 
     if (!tracking) {
       return res.status(404).json({ message: "Tracking ID não encontrado ou não pertence à empresa." });
@@ -63,7 +63,7 @@ const getSalesByTrackingId = async (req, res) => {
   const { trackingId } = req.params;
 
   try {
-    const orders = await Order.find({ trackingId, company: req.company._id, status: "confirmado" }); // Filtramos também por empresa
+    const orders = await Order.find({ trackingId, company: req.companyId, status: "confirmado" }); // Filtramos também por empresa
 
     if (!orders.length) {
       return res.status(404).json({ message: "Nenhuma venda encontrada para esse trackingId." });
@@ -88,7 +88,7 @@ const deleteTracking = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const tracking = await Tracking.findOneAndDelete({ _id: id, company: req.company._id }); // Garantimos que o tracking pertence à empresa
+    const tracking = await Tracking.findOneAndDelete({ _id: id, company: req.companyId }); // Garantimos que o tracking pertence à empresa
 
     if (!tracking) {
       return res.status(404).json({ message: "Tracking ID não encontrado ou não pertence à empresa." });

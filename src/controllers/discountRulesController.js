@@ -12,7 +12,7 @@ const createDiscountRule = async (req, res) => {
       value,
       includedProducts,
       excludedProducts,
-      company: req.company._id
+      company: req.companyId
     });
     res.status(201).json(discountRule);
   } catch (error) {
@@ -23,7 +23,7 @@ const createDiscountRule = async (req, res) => {
 // Listar todas as regras de desconto
 const getDiscountRules = async (req, res) => {
   try {
-    const discountRules = await DiscountRule.find({ company: req.company._id }).populate('includedProducts excludedProducts');
+    const discountRules = await DiscountRule.find({ company: req.companyId }).populate('includedProducts excludedProducts');
     res.status(200).json(discountRules);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao buscar regras de desconto', error });
@@ -34,7 +34,7 @@ const getDiscountRules = async (req, res) => {
 const getDiscountRuleById = async (req, res) => {
 
   try {
-    const discountRule = await DiscountRule.findOne({ _id: req.params.id, company: req.company._id }).populate('includedProducts excludedProducts');
+    const discountRule = await DiscountRule.findOne({ _id: req.params.id, company: req.companyId }).populate('includedProducts excludedProducts');
 
     if (!discountRule) {
       return res.status(404).json({ message: 'Regra de desconto não encontrada' });
@@ -50,7 +50,7 @@ const updateDiscountRule = async (req, res) => {
   try {
     const { name, description, type, value, includedProducts, excludedProducts } = req.body;
     const discountRule = await DiscountRule.findOneAndUpdate(
-      { _id: req.params.id, company: req.company._id }, // Filtramos pelo ID e empresa
+      { _id: req.params.id, company: req.companyId }, // Filtramos pelo ID e empresa
       { name, description, type, value, includedProducts, excludedProducts },
       { new: true }
     );
@@ -69,7 +69,7 @@ const updateDiscountRule = async (req, res) => {
 // Deletar uma regra de desconto
 const deleteDiscountRule = async (req, res) => {
   try {
-    const discountRule = await DiscountRule.findOneAndDelete({ _id: req.params.id, company: req.company._id }); 
+    const discountRule = await DiscountRule.findOneAndDelete({ _id: req.params.id, company: req.companyId }); 
     
     if (!discountRule) {
       // Retorna erro se a regra não for encontrada ou não pertencer à empresa

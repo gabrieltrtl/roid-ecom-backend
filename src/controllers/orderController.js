@@ -24,7 +24,7 @@ const createOrder = async (req, res) => {
 
     // Verificando se os produtos existem
     const productIds = products.map((p) => p.product);
-    const productsExist = await Product.find({ _id: { $in: productIds }, company: req.company._id });
+    const productsExist = await Product.find({ _id: { $in: productIds }, company: req.companyId });
     if (productsExist.length !== products.length) {
       return res
         .status(400)
@@ -34,7 +34,7 @@ const createOrder = async (req, res) => {
     // Buscar regra de desconto, se existir.
     let discountRule = null;
     if (discountRuleId) {
-      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company: req.company._id }); // ✅ Garantia que a regra pertence à empresa
+      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company: req.companyId }); // ✅ Garantia que a regra pertence à empresa
     }
 
     let totalPrice = 0;
@@ -94,7 +94,7 @@ const getOrders = async (req, res) => {
     const { startDate, endDate } = req.query;
 
     const filter = {
-      company: req.company._id
+      company: req.companyId
     };
 
     if (startDate && endDate) {
@@ -189,7 +189,7 @@ const createTemporaryOrder = async (req, res) => {
     }
 
     const productIds = products.map((p) => p.product);
-    const productsData = await Product.find({ _id: { $in: productIds }, company: req.company._id });
+    const productsData = await Product.find({ _id: { $in: productIds }, company: req.companyId });
 
     if (productsData.length !== products.length) {
       console.error("❌ Produtos não encontrados:", productIds);
@@ -198,7 +198,7 @@ const createTemporaryOrder = async (req, res) => {
 
     let discountRule = null;
     if (discountRuleId) {
-      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company: req.company._id });
+      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company: req.companyId });
       if (!discountRule) {
         console.error(`❌ Regra de desconto com ID ${discountRuleId} não encontrada.`);
         return res.status(404).json({ message: "Regra de desconto não encontrada!" });
@@ -247,7 +247,7 @@ const createTemporaryOrder = async (req, res) => {
     });
 
     console.log("📝 Criando novo pedido temporário com os dados:", {
-      company: req.company._id,
+      company: req.companyId,
       products: formattedProducts,
       discountRule: discountRuleId,
       totalPrice,
@@ -257,7 +257,7 @@ const createTemporaryOrder = async (req, res) => {
 
     // criar novo pedido temporário no banco de dados
     const newOrder = new Order({
-      company: req.company._id,
+      company: req.companyId,
       products: formattedProducts,
       discountRule: discountRuleId,
       totalPrice,
@@ -426,7 +426,7 @@ const updateTrackingCode = async (req, res) => {
 
   try {
     const updatedOrder = await Order.findOneAndUpdate(
-      { _id: id, company: req.company._id },
+      { _id: id, company: req.companyId },
       {
         trackingCode,
         status: "ENVIADO", // ✅ Atualiza o status também
@@ -451,7 +451,7 @@ const cancelOrder = async (req, res) => {
     console.log("🟡 Cancelando pedido ID:", orderId);
     console.log("Empresa:", req.company?._id); // ← importante no multi-tenant
 
-    const order = await Order.findOne({ _id: orderId, company: req.company._id });
+    const order = await Order.findOne({ _id: orderId, company: req.companyId });
 
     if (!order) {
       return res.status(404).json({ message: 'Pedido não encontrado' });

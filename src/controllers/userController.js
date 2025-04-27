@@ -52,7 +52,7 @@ const createUser = async (req, res) => {
     }
 
     // Verifica se o usuário já existe nessa empresa
-    const existingUser = await User.findOne({ email, companyId: req.company._id });
+    const existingUser = await User.findOne({ email, companyId: req.companyId });
 
     if (existingUser) {
       return res.status(400).json({ message: "Usuário já cadastrado para esta empresa." });
@@ -132,7 +132,7 @@ const updateUser = async (req, res) => {
     }
 
     const updatedUser = await User.findOneAndUpdate(
-      { _id: id, companyId: req.company._id },
+      { _id: id, companyId: req.companyId },
       { name, email, password, role },
       { new: true }
     );
@@ -156,7 +156,7 @@ const deleteUser = async (req, res) => {
       return res.status(400).json({ message: "Empresa não identificada." });
     }
     
-    const deletedUser = await User.findOneAndDelete({ _id: id, companyId: req.company._id });
+    const deletedUser = await User.findOneAndDelete({ _id: id, companyId: req.companyId });
 
     if (!deletedUser) {
       return res.status(404).json({ message: 'Usuário não encontrado' });
