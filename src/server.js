@@ -19,7 +19,6 @@ const app = express();
 conectarDB();
 
 // Middlewares 
-// Middlewares 
 app.use(cors({
   origin: (origin, callback) => {
     console.log("❓ Origem detectada: ", origin);
@@ -73,7 +72,7 @@ app.use('/api', productRoutes);  // Usa as rotas de produtos sob o prefixo /api
 app.use('/api', userRoutes);
 app.use('/api', trackingRoutes);
 app.use('/api', discountRulesRoutes);
-app.use('/api', shippingPoliciesRoutes);
+app.use('/api/shipping', shippingPoliciesRoutes);
 
 
 // Iniciar o Servidor

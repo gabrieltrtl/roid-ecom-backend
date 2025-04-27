@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const identifyCompany = require('../middlewares/identifyCompany');
 
 const {
   getAllShippingPolicies,
@@ -8,9 +9,9 @@ const {
   deleteShippingPolicy
 } = require('../controllers/ShippingPolicyController');
 
-router.get('/shipping', getAllShippingPolicies);
-router.post('/shipping', createShippingPolicy);
-router.put('/shipping/:id', updateShippingPolicy);
-router.delete('/shipping/:id', deleteShippingPolicy);
+router.get('/', identifyCompany, getAllShippingPolicies);
+router.post('/', identifyCompany, createShippingPolicy);
+router.put('/:id', identifyCompany, updateShippingPolicy);
+router.delete('/:id', identifyCompany, deleteShippingPolicy);
 
 module.exports = router; // ✅ importante!
