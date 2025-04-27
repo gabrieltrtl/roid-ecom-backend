@@ -10,7 +10,13 @@ const UserSchema = new mongoose.Schema({
     enum: ['admin', 'superadmin', 'gerente', 'atendente'],
     default: 'atendente'
   },
-  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true }
+  companyId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Company', 
+    required: function() {
+      return this.role !== 'superadmin';
+    }
+  }
 }, { timestamps: true });
 
 // Hash da senha antes de salvar
