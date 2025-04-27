@@ -63,7 +63,7 @@ app.get('/', (req, res) => {
   res.send('Api Rodando!')
 });
 
-app.use('/api', companyRoutes);
+app.use('/api/companies', companyRoutes);
 
 // Usando as rotas
 app.use('/api/customers', customerRoutes);  // Integrando as rotas de clientes
