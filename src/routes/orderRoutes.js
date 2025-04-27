@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const identifyCompany = require('../middlewares/identifyCompany');
 const {
   createOrder,
   getOrders,
@@ -15,35 +16,35 @@ const {
 } = require('../controllers/orderController');
 
 // Rota para criar pedido
-router.post('/orders', createOrder);     
-
-router.get('/orders/average-time-between-purchases', getAverageTimeBetweenPurchases)
+router.post('/', identifyCompany, createOrder);     
 
 // Rota para criar pedido temporário
-router.post('/orders/temporary', createTemporaryOrder);
+router.post('/temporary', identifyCompany, createTemporaryOrder);
 
-router.put('/orders/confirm/:orderId', confirmOrder);
+// Rota para confirmar pedido
+router.put('/confirm/:orderId', identifyCompany, confirmOrder);
 
 // Listar todos os pedidos
-router.get('/orders', getOrders);       
+router.get('/', identifyCompany, getOrders);       
 
 // Listar status disponíveis para pedidos
-router.get('/orders/statuses', getOrderStatuses);
+router.get('/statuses', identifyCompany, getOrderStatuses);
 
 // Obter pedido específico
-router.get('/orders/:id', getOrderById);     
+router.get('/:id', identifyCompany, getOrderById);     
 
 // Atualizar status do pedido
-router.put('/orders/:id', updateOrderStatus); 
+router.put('/:id', identifyCompany, updateOrderStatus); 
 
-router.patch('/orders/:id/tracking-code', updateTrackingCode); 
+router.patch('/:id/tracking-code', identifyCompany, updateTrackingCode); 
 
 // Deletar pedido
-router.delete('/orders/:id', deleteOrder);  
+router.delete('/:id', identifyCompany, deleteOrder);  
 
 // Cancelar pedido
-router.put('/orders/cancel/:id', cancelOrder);
+router.put('/cancel/:id', identifyCompany, cancelOrder);
 
-
+// Tempo médio entre compras
+router.get('/average-time-between-purchases', identifyCompany, getAverageTimeBetweenPurchases);
 
 module.exports = router;
