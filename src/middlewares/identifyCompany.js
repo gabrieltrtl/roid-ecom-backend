@@ -1,52 +1,28 @@
-const Company = require('../models/Company');
+const jwt = require("jsonwebtoken");
 
-const identifyCompany = async (req, res, next) => {
+const identifyCompany = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    console.log('Token Ausente na Requisição.')
+    return res.status(400).json({ message: 'Token ausente.' })
+  }
+
+  const token = authHeader.split(' ')[1];
+
   try {
-    const host = req.headers.host; 
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (!host) {
-      console.log(`❌ Host não encontrado na requisição.`);
-      return res.status(400).json({ message: "Host não encontrado na requisição." });
-    }
+    req.companyId = decoded.companyId;
+    req.userId = decoded.userId;
+    req.role = decoded.role;
 
-    // Ignora verificação de subdomínio em ambiente de dev local (opcional)
-    if (process.env.NODE_ENV === 'development' && host.startsWith('localhost')) {
-      console.log('⚙️ Ambiente de desenvolvimento - ignorando subdomínio.');
-      return next();
-    }
+    console.log("✅ Empresa e usuário identificados:", { companyId: req.companyId, userId: req.userId });
 
-    const hostParts = host.split('.');
-
-   
-    if (hostParts.length === 2 && hostParts[1] === 'com' && hostParts[0] === 'bulkcrm') {
-      console.log(`🔍 Dominio principal identificado: ${host}`);
-      // Trate como o domínio principal
-      return next(); // ✅ Permite seguir sem validar o subdomínio
-    }
-
-    // ⚠️ SE NÃO HOUVER SUBDOMÍNIO VÁLIDO: Se o host não tiver um subdomínio válido
-    if (hostParts.length < 2) {
-      console.log(`❌ Subdomínio inválido: ${host}`);
-      return res.status(400).json({ message: "Subdomínio inválido." });
-    }
-
-    const subdomain = hostParts[0]; // Ex: empresa1
-    console.log(`🔍 Subdomínio identificado: ${subdomain}`);
-
-    // 💡 NOVO: Verifique a empresa com o subdomínio
-    const company = await Company.findOne({ domain: subdomain });
-
-    if (!company) {
-      console.log(`🚫 Subdomínio ${subdomain} não autorizado.`);
-      return res.status(403).json({ message: "Subdomínio não autorizado." });
-    }
-
-    req.company = company; // 🔥 Empresa disponível nos controllers
-    console.log("🏢 Empresa identificada no middleware:", req.company);
     next();
   } catch (error) {
-    console.error("❌ Erro ao identificar empresa:", error);
-    res.status(500).json({ message: "Erro ao identificar empresa", error });
+    console.error("❌ Erro ao verificar token:", error);
+    return res.status(401).json({ message: 'Token inválido ou expirado.' });
   }
 };
 
