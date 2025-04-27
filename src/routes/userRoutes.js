@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const identifyCompany = require('../middlewares/identifyCompany');
 const { 
   loginUser,
   createUser,
@@ -13,18 +14,18 @@ const {
 router.post('/login', loginUser);
 
 // Rota para criar um usuário
-router.post('/users', createUser);
+router.post('/users', identifyCompany, createUser);
 
 // Rota para listar todos os usuários
-router.get('/users', getAllUsers);
+router.get('/users', identifyCompany, getAllUsers);
 
 // Rota para buscar um usuário pelo ID
-router.get('/users/:id', getUserById);
+router.get('/users/:id', identifyCompany, getUserById);
 
 // Rota para atualizar os dados de um usuário
-router.put('/users/:id', updateUser);
+router.put('/users/:id', identifyCompany, updateUser);
 
 // Rota para deletar um usuário
-router.delete('/users/:id', deleteUser);
+router.delete('/users/:id', identifyCompany, deleteUser);
 
 module.exports = router;

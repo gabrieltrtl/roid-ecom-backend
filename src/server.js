@@ -4,7 +4,6 @@ const cors = require('cors');
 const cron = require('node-cron');
 const cleanOldTemporaryOrders = require('./utils/cleanTemporaryOrders');
 require('dotenv').config();
-const identifyCompany = require('./middlewares/identifyCompany');
 const customerRoutes = require('./routes/customerRoutes'); // Importando rotas de clientes
 const orderRoutes = require('./routes/orderRoutes'); // Importando rotas de pedidos
 const productRoutes = require('./routes/productRoutes'); // Importando rotas de produtos
@@ -67,10 +66,8 @@ app.get('/', (req, res) => {
 
 app.use('/api', companyRoutes);
 
-app.use(identifyCompany);
-
 // Usando as rotas
-app.use('/api', customerRoutes);  // Integrando as rotas de clientes
+app.use('/api/customers', customerRoutes);  // Integrando as rotas de clientes
 app.use('/api', orderRoutes); // Integrando as rotas de pedidos
 app.use('/api', productRoutes);  // Usa as rotas de produtos sob o prefixo /api
 app.use('/api', userRoutes);
