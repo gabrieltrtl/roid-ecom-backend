@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const identifyCompany = require('../middlewares/identifyCompany');
 const { 
   createProduct,
   getAllProducts,
@@ -9,18 +10,18 @@ const {
 } = require('../controllers/productController');
 
 // Rota para criar um produto
-router.post('/products', createProduct);
+router.post('/', identifyCompany, createProduct);
 
 // Rota para listar todos os produtos
-router.get('/products', getAllProducts);
+router.get('/', identifyCompany, getAllProducts);
 
 // Rota para buscar um produto pelo ID
-router.get('/products/:id', getProductById);
+router.get('/:id', identifyCompany, getProductById);
 
 // Rota para atualizar um produto
-router.put('/products/:id', updateProduct);
+router.put('/:id', identifyCompany, updateProduct);
 
 // Rota para deletar um produto
-router.delete('/products/:id', deleteProduct);
+router.delete('/:id', identifyCompany, deleteProduct);
 
 module.exports = router;

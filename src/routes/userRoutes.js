@@ -14,18 +14,18 @@ const {
 router.post('/login', loginUser);
 
 // Rota para criar um usuário
-router.post('/users', identifyCompany, createUser);
+router.post('/', identifyCompany, createUser);
 
 // Rota para listar todos os usuários
-router.get('/users', identifyCompany, getAllUsers);
+router.get('/', identifyCompany, getAllUsers);
 
 // Rota para buscar um usuário pelo ID
-router.get('/users/:id', identifyCompany, getUserById);
+router.get('/:id', identifyCompany, getUserById);
 
 // Rota para atualizar os dados de um usuário
-router.put('/users/:id', identifyCompany, updateUser);
+router.put('/:id', identifyCompany, updateUser);
 
 // Rota para deletar um usuário
-router.delete('/users/:id', identifyCompany, deleteUser);
+router.delete('/:id', identifyCompany, deleteUser);
 
 module.exports = router;

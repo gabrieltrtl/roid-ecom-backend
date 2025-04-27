@@ -69,7 +69,7 @@ app.use('/api', companyRoutes);
 app.use('/api/customers', customerRoutes);  // Integrando as rotas de clientes
 app.use('/api', orderRoutes); // Integrando as rotas de pedidos
 app.use('/api', productRoutes);  // Usa as rotas de produtos sob o prefixo /api
-app.use('/api', userRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/tracking', trackingRoutes);
 app.use('/api/discounts', discountRulesRoutes);
 app.use('/api/shipping', shippingPoliciesRoutes);
