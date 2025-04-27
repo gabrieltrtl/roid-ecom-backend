@@ -1,33 +1,33 @@
-const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
 // Função para logar usuário
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
-  const company = req.company;
 
   try {
+    const user = await User.findOne({ email });
 
-    if (!company) {
-      return res.status(400).json({ message: "Empresa não identificada." });
-    }
-
-     // Verifica se o usuário existe nessa empresa
-     const user = await User.findOne({ email, companyId: company._id });
-    // Verifica se o usuário existe
     if (!user) {
-      return res.status(404).json({ message: "Usuário não encontrado para esta empresa." });
+      return res.status(404).json({ message: "Usuário não encontrado." });
     }
 
-    // Compara a senha fornecida com a senha armazenada no banco
     const isPasswordValid = await user.comparePassword(password);
+
     if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Senha inválida' });
+      return res.status(401).json({ message: 'Senha inválida.' });
     }
 
-    // Cria o token JWT
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "8h" });
-
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        companyId: user.companyId,
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "8h" }
+    );
+    
     res.status(200).json({ token });
   } catch (error) {
     console.error('Erro ao fazer login:', error);
@@ -38,15 +38,10 @@ const loginUser = async (req, res) => {
 // Função para criar um usuário
 const createUser = async (req, res) => {
   try {
-
-    console.log("📥 Dados recebidos:", req.body);
-    console.log("📥 Tipo da senha recebida:", typeof req.body.password);
     const { name, email, password, role } = req.body;
 
-    const company = req.company;
-
-    if (!company) {
-      return res.status(400).json({ message: "Empresa não identificada no subdomínio." });
+    if (!req.companyId) {
+      return res.status(400).json({ message: "Empresa não identificada no token." });
     }
 
     // 🔐 Converte e valida a senha
@@ -57,7 +52,7 @@ const createUser = async (req, res) => {
     }
 
     // Verifica se o usuário já existe nessa empresa
-    const existingUser = await User.findOne({ email, companyId: company._id });
+    const existingUser = await User.findOne({ email, companyId: req.company._id });
 
     if (existingUser) {
       return res.status(400).json({ message: "Usuário já cadastrado para esta empresa." });
@@ -68,7 +63,7 @@ const createUser = async (req, res) => {
       email,
       password: stringPassword,
       role,
-      companyId: company._id,
+      companyId: req.companyId,
     });
 
     await newUser.save();
@@ -91,14 +86,11 @@ const createUser = async (req, res) => {
 // Função para listar todos os usuários
 const getAllUsers = async (req, res) => {
   try {
-    const company = req.company;
-
-    if (!company) {
-      return res.status(400).json({ message: "Empresa não identificada." });
+    if (!req.companyId) {
+      return res.status(400).json({ message: "Empresa não identificada."} );
     }
 
-     // 🔹 Retorna apenas os usuários da empresa logada
-    const users = await User.find({ companyId: company._id });
+    const users = await User.find({ companyId: req.companyId })
 
     res.status(200).json(users);
   } catch (error) {
@@ -110,12 +102,17 @@ const getAllUsers = async (req, res) => {
 const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const company = req.company;
-
-    const user = await User.findOne({ _id: id, companyId: company._id });
-    if (!user) {
-      return res.status(404).json({ message: 'Usuário não encontrado' });
+    
+    if (!req.companyId) {
+      return res.status(400).json({ message: "Empresa não identificada." });
     }
+
+    const user = await User.findOne({ _id: id, companyId: req.companyId });
+
+    if (!user) {
+      return res.status(400).json({ message: "Usuário não encontrado." });
+    }
+
 
     res.status(200).json(user);
   } catch (error) {
@@ -128,10 +125,14 @@ const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, email, password, role } = req.body;
-    const company = req.company;
+    
+
+    if (!req.companyId) {
+      return res.status(400).json({ message: "Empresa não identificada." });
+    }
 
     const updatedUser = await User.findOneAndUpdate(
-      { _id: id, companyId: company._id },
+      { _id: id, companyId: req.company._id },
       { name, email, password, role },
       { new: true }
     );
@@ -150,9 +151,12 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const company = req.company;
     
-    const deletedUser = await User.findOneAndDelete({ _id: id, companyId: company._id });
+    if (!req.companyId) {
+      return res.status(400).json({ message: "Empresa não identificada." });
+    }
+    
+    const deletedUser = await User.findOneAndDelete({ _id: id, companyId: req.company._id });
 
     if (!deletedUser) {
       return res.status(404).json({ message: 'Usuário não encontrado' });
