@@ -1,21 +1,23 @@
 // backend/src/routes/trackingRoutes.js
 const express = require("express");
 const router = express.Router();
+const identifyCompany = require('../middlewares/identifyCompany');
 const { createTracking, getTracking, getSalesByTrackingId, getAllTrackings, deleteTracking } = require('../controllers/trackingController');
 
 // Criar um novo trackingId
-router.post("/tracking", createTracking);
+router.post("/", identifyCompany, createTracking);
 
 // buscar todos os trackings
-router.get("/tracking", getAllTrackings);
-
-// Deletar um trackingId específico
-router.delete("/tracking/:id", deleteTracking);
+router.get("/", identifyCompany, getAllTrackings);
 
 // Buscar trackingId específico
-router.get("/tracking/:trackingId", getTracking);
+router.get("/:trackingId", identifyCompany, getTracking);
 
 // Buscar vendas por trackingId
-router.get("/tracking/:trackingId/sales", getSalesByTrackingId);
+router.get("/:trackingId/sales", identifyCompany, getSalesByTrackingId);
+
+// Deletar um trackingId específico
+router.delete("/tracking/:id", identifyCompany, deleteTracking);
+
 
 module.exports = router;
