@@ -36,6 +36,7 @@ router.get('/:id', identifyCompany, getOrderById);
 // Atualizar status do pedido
 router.put('/:id', identifyCompany, updateOrderStatus); 
 
+// Atualizar código de rastreio
 router.patch('/:id/tracking-code', identifyCompany, updateTrackingCode); 
 
 // Deletar pedido

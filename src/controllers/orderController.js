@@ -176,9 +176,9 @@ const deleteOrder = async (req, res) => {
 const createTemporaryOrder = async (req, res) => {
   try {
     const { products, discountRule: discountRuleId } = req.body;
-    console.log("🏢 Empresa identificada:", req.company);
+    console.log("🏢 Empresa identificada:", req.companyId);
 
-    if (!req.company) {
+    if (!req.companyId) {
       console.error("❌ Empresa não identificada.");
       return res.status(400).json({ message: "Empresa não identificada!" });
     }
