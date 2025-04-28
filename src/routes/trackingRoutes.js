@@ -17,7 +17,7 @@ router.get("/:trackingId", identifyCompany, getTracking);
 router.get("/:trackingId/sales", identifyCompany, getSalesByTrackingId);
 
 // Deletar um trackingId específico
-router.delete("/tracking/:id", identifyCompany, deleteTracking);
+router.delete("/:id", identifyCompany, deleteTracking);
 
 
 module.exports = router;
