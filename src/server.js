@@ -63,9 +63,9 @@ app.get('/', (req, res) => {
   res.send('Api Rodando!')
 });
 
-app.use('/api/companies', companyRoutes);
 
 // Usando as rotas
+app.use('/api/companies', companyRoutes);
 app.use('/api/customers', customerRoutes);  // Integrando as rotas de clientes
 app.use('/api/orders', orderRoutes); // Integrando as rotas de pedidos
 app.use('/api/products', productRoutes);  // Usa as rotas de produtos sob o prefixo /api

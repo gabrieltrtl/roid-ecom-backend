@@ -38,41 +38,48 @@ const loginUser = async (req, res) => {
 // Função para criar um usuário
 const createUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, companyId: bodyCompanyId } = req.body;
 
     if (!role) {
       return res.status(400).json({ message: "O campo role é obrigatório." });
     }
 
-    let companyId = req.companyId; // padrão: usa o companyId da requisição
+    let companyId = req.companyId; // padrão: companyId do token
 
-     // 🚨 Se for superadmin, não precisa de companyId
-     if (role === 'superadmin') {
+    // 🚨 Se o novo usuário for superadmin, não precisa de companyId
+    if (role === 'superadmin') {
       companyId = undefined;
     }
+    
+    // 🚨 Se quem está criando é superadmin e criando um usuário normal (não superadmin),
+    // companyId deve vir no body obrigatoriamente
+    if (req.role === 'superadmin' && role !== 'superadmin') {
+      if (!bodyCompanyId) {
+        return res.status(400).json({ message: "Superadmin criando usuário comum precisa informar companyId." });
+      }
+      companyId = bodyCompanyId;
+    }
 
-    // 🔐 Converte e valida a senha
+    // Se não tem companyId e não é superadmin, erro
+    if (!companyId && role !== 'superadmin') {
+      return res.status(400).json({ message: "Empresa não identificada. companyId obrigatório para este tipo de usuário." });
+    }
+
+    // 🔐 Validação da senha
     const stringPassword = String(password).trim();
-
     if (!stringPassword || stringPassword.length < 6) {
       return res.status(400).json({ message: "Senha inválida. Deve ter pelo menos 6 caracteres." });
     }
 
-    if (role !== 'superadmin' && !companyId) {
-      return res.status(400).json({ message: "Empresa não identificada. companyId obrigatório para este tipo de usuário." });
-    }
-
-    // 🚨 Verifica se o e-mail já existe (considerando companyId se não for superadmin)
+    // Verifica se o e-mail já existe (considerando companyId se não for superadmin)
     const existingQuery = { email };
     if (role !== 'superadmin') {
       existingQuery.companyId = companyId;
     }
 
-    // Verifica se o usuário já existe nessa empresa
     const existingUser = await User.findOne(existingQuery);
-
     if (existingUser) {
-      return res.status(400).json({ message: "Usuário já cadastrado para esta empresa." });
+      return res.status(400).json({ message: "Usuário já cadastrado." });
     }
 
     const newUser = new User({
@@ -80,11 +87,12 @@ const createUser = async (req, res) => {
       email,
       password: stringPassword,
       role,
-      companyId: companyId || undefined, // ⚡ Só passa se existir
+      companyId: companyId || undefined, // companyId só se tiver
     });
 
     await newUser.save();
     res.status(201).json(newUser);
+
   } catch (error) {
     console.error("❌ Erro ao criar usuário:", error);
 
@@ -99,6 +107,7 @@ const createUser = async (req, res) => {
     });
   }
 };
+
 
 // Função para listar todos os usuários
 const getAllUsers = async (req, res) => {

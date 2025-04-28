@@ -17,7 +17,7 @@ const createOrder = async (req, res) => {
     } = req.body;
 
     // Verificando se o cliente existe
-    const customerExists = await Customer.findById(customer);
+    const customerExists = await Customer.findOne({ _id: customer, company: req.companyId });
     if (!customerExists) {
       return res.status(400).json({ message: "Cliente não encontrado!" });
     }
@@ -69,7 +69,7 @@ const createOrder = async (req, res) => {
     });
 
     const newOrder = new Order({
-      company,
+      company: req.companyId,
       customer,
       products: updatedProducts,
       discountRule: discountRuleId,
