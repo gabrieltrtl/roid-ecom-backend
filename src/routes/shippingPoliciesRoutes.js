@@ -9,9 +9,16 @@ const {
   deleteShippingPolicy
 } = require('../controllers/ShippingPolicyController');
 
-router.get('/', identifyCompany, getAllShippingPolicies);
+// Criar política de frete
 router.post('/', identifyCompany, createShippingPolicy);
+
+// Lista todas as políticas de frete
+router.get('/', identifyCompany, getAllShippingPolicies);
+
+// Edita uma política de frete
 router.put('/:id', identifyCompany, updateShippingPolicy);
+
+// Deleta uma política de frete
 router.delete('/:id', identifyCompany, deleteShippingPolicy);
 
-module.exports = router; // ✅ importante!
+module.exports = router; // 
