@@ -20,29 +20,12 @@ conectarDB();
 
 // Middlewares 
 app.use(cors({
-  origin: (origin, callback) => {
-    console.log("❓ Origem detectada: ", origin);
-
-    const allowed = [
-      /.*\.bulkcrm\.com$/,        // Produção
-      /.*\.localhost:\d+$/        // Subdomínios locais com porta (ex: empresa1.localhost:5173)
-    ];
-
-    const isAllowed = allowed.some((regex) => regex.test(origin));
-
-    if (!origin || isAllowed) {
-      callback(null, true); // ✅ Libera
-    } else {
-      callback(new Error('Not allowed by CORS')); // ❌ Bloqueia
-    }
-  },
+  origin: 'http://localhost:5173', // ou use process.env.FRONTEND_URL se preferir
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  
-  // ✅ Adicionado o header 'tracking-id' aqui:
   allowedHeaders: ['Content-Type', 'Authorization', 'tracking-id'],
-
   credentials: true,
 }));
+
 
 
 // Adicionar este middleware para garantir que OPTIONS seja tratado antes de todas as rotas
