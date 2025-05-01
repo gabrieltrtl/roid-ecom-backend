@@ -3,12 +3,12 @@ const DiscountRule = require('../models/DiscountRule');
 // Criar nova regra de desconto
 const createDiscountRule = async (req, res) => {
   try {
-    const { name, description, rule } = req.body;
+    const { name, description, rules } = req.body;
 
     const discountRule = await DiscountRule.create({ 
       name, 
       description,
-      rule,
+      rules,
       company: req.companyId
     });
     res.status(201).json(discountRule);
@@ -45,7 +45,7 @@ const getDiscountRuleById = async (req, res) => {
 // Atualizar uma regra de desconto
 const updateDiscountRule = async (req, res) => {
   try {
-    const { name, description, rule } = req.body;
+    const { name, description, rules } = req.body;
     const discountRule = await DiscountRule.findOneAndUpdate(
       { _id: req.params.id, company: req.companyId }, // Filtramos pelo ID e empresa
       { name, description, rules },
