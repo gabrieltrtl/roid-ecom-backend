@@ -1,7 +1,8 @@
 const Order = require("../models/Order");
-const Product = require("../models/Product"); // Adicionando a importação do modelo Product
 const Customer = require("../models/Customer");
+const Product = require("../models/Product"); // Adicionando a importação do modelo Product
 const DiscountRule = require("../models/DiscountRule");
+const { calculateDiscountPrice } = require("../utils/discountEngine");
 
 // Função para criar um novo pedido
 const createOrder = async (req, res) => {
@@ -17,14 +18,20 @@ const createOrder = async (req, res) => {
     } = req.body;
 
     // Verificando se o cliente existe
-    const customerExists = await Customer.findOne({ _id: customer, company: req.companyId });
+    const customerExists = await Customer.findOne({
+      _id: customer,
+      company: req.companyId,
+    });
     if (!customerExists) {
       return res.status(400).json({ message: "Cliente não encontrado!" });
     }
 
     // Verificando se os produtos existem
     const productIds = products.map((p) => p.product);
-    const productsExist = await Product.find({ _id: { $in: productIds }, company: req.companyId });
+    const productsExist = await Product.find({
+      _id: { $in: productIds },
+      company: req.companyId,
+    });
     if (productsExist.length !== products.length) {
       return res
         .status(400)
@@ -34,28 +41,22 @@ const createOrder = async (req, res) => {
     // Buscar regra de desconto, se existir.
     let discountRule = null;
     if (discountRuleId) {
-      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company: req.companyId }); // ✅ Garantia que a regra pertence à empresa
+      discountRule = await DiscountRule.findOne({
+        _id: discountRuleId,
+        company: req.companyId,
+      }); // ✅ Garantia que a regra pertence à empresa
     }
 
     let totalPrice = 0;
     const updatedProducts = products.map((p) => {
-      const product = productsExist.find((prod) => prod._id.toString() === p.product.toString());
+      const product = productsExist.find(
+        (prod) => prod._id.toString() === p.product.toString()
+      );
       let productPrice = product.price;
 
       // aplicar desconto , se aplicável
       if (discountRule) {
-        const isIncluded = discountRule.includedProducts.includes(product._id);
-        const isExcluded = discountRule.excludedProducts.includes(product._id);
-
-        if ((isIncluded || discountRule.includedProducts.length === 0) && !isExcluded) {
-          if (discountRule.type === 'percentage') {
-            productPrice -= (productPrice * discountRule.value) / 100;
-          } else if (discountRule.type === 'fixed') {
-            productPrice -= discountRule.value;
-          }
-
-          if (productPrice < 0) productPrice = 0;
-        }
+        productPrice = calculateDiscountPrice(product, discountRule);
       }
 
       const productTotalPrice = productPrice * p.quantity; // Preço do produto * quantidade
@@ -94,34 +95,36 @@ const getOrders = async (req, res) => {
     const { startDate, endDate } = req.query;
 
     const filter = {
-      company: req.companyId
+      company: req.companyId,
     };
 
     if (startDate && endDate) {
       filter.createdAt = {
-        $gte: new Date(startDate + 'T00:00:00.000Z'),
-        $lte: new Date(endDate + 'T23:59:59.999Z'),
+        $gte: new Date(startDate + "T00:00:00.000Z"),
+        $lte: new Date(endDate + "T23:59:59.999Z"),
       };
     }
 
-    const orders = await Order.find(filter).populate("customer", "name surname email");
+    const orders = await Order.find(filter).populate(
+      "customer",
+      "name surname email"
+    );
     res.status(200).json(orders);
   } catch (error) {
     res.status(500).json({ message: "Erro ao buscar pedidos", error });
   }
 };
 
-
 // Função para obter um pedido específico
 const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
     const order = await Order.findById(id)
-      .populate('customer')
-      .populate('discountRule')
+      .populate("customer")
+      .populate("discountRule")
       .populate({
-        path: 'products.product',   // 🔥 popula o campo correto
-        model: 'Product'            // 💡 certifique-se que o model realmente se chama 'Product'
+        path: "products.product", // 🔥 popula o campo correto
+        model: "Product", // 💡 certifique-se que o model realmente se chama 'Product'
       });
 
     if (!order) {
@@ -189,25 +192,39 @@ const createTemporaryOrder = async (req, res) => {
     }
 
     const productIds = products.map((p) => p.product);
-    const productsData = await Product.find({ _id: { $in: productIds }, company: req.companyId });
+    const productsData = await Product.find({
+      _id: { $in: productIds },
+      company: req.companyId,
+    });
 
     if (productsData.length !== products.length) {
       console.error("❌ Produtos não encontrados:", productIds);
-      return res.status(400).json({ message: "Um ou mais produtos não encontrados!" });
+      return res
+        .status(400)
+        .json({ message: "Um ou mais produtos não encontrados!" });
     }
 
     let discountRule = null;
     if (discountRuleId) {
-      discountRule = await DiscountRule.findOne({ _id: discountRuleId, company: req.companyId });
+      discountRule = await DiscountRule.findOne({
+        _id: discountRuleId,
+        company: req.companyId,
+      });
       if (!discountRule) {
-        console.error(`❌ Regra de desconto com ID ${discountRuleId} não encontrada.`);
-        return res.status(404).json({ message: "Regra de desconto não encontrada!" });
+        console.error(
+          `❌ Regra de desconto com ID ${discountRuleId} não encontrada.`
+        );
+        return res
+          .status(404)
+          .json({ message: "Regra de desconto não encontrada!" });
       }
     }
 
     let totalPrice = 0;
     const formattedProducts = products.map((p) => {
-      const product = productsData.find((prod) => prod._id.toString() === p.product.toString());
+      const product = productsData.find(
+        (prod) => prod._id.toString() === p.product.toString()
+      );
 
       if (!product) {
         console.error(`❌ Produto com ID ${p.product} não encontrado.`);
@@ -218,20 +235,7 @@ const createTemporaryOrder = async (req, res) => {
 
       // ✅ Aplicar o desconto, se aplicável
       if (discountRule) {
-        const isIncluded = discountRule.includedProducts.includes(product._id);
-        const isExcluded = discountRule.excludedProducts.includes(product._id);
-
-        if ((isIncluded || discountRule.includedProducts.length === 0) && !isExcluded) {
-          if (discountRule.type === 'percentage') {
-            productPrice -= (productPrice * discountRule.value) / 100;
-          } else if (discountRule.type === 'fixed') {
-            productPrice -= discountRule.value;
-          } else if (discountRule.type === 'override') {
-            productPrice = discountRule.value;
-          }
-
-          if (productPrice < 0) productPrice = 0;
-        }
+        productPrice = calculateDiscountedPrice(product, discountRule);
       }
 
       const productTotal = productPrice * p.quantity;
@@ -253,8 +257,6 @@ const createTemporaryOrder = async (req, res) => {
       totalPrice,
     });
 
-
-
     // criar novo pedido temporário no banco de dados
     const newOrder = new Order({
       company: req.companyId,
@@ -268,10 +270,9 @@ const createTemporaryOrder = async (req, res) => {
     await newOrder.save();
 
     // Gerar link do pedido
-    const subdomain = req.company?.domain || 'localhost';
+    const subdomain = req.company?.domain || "localhost";
     const port = 5173; // Use variável de ambiente se quiser
     const orderLink = `http://${subdomain}.localhost:${port}/pedido/${newOrder._id}`;
-
 
     res.json({ orderId: newOrder._id, orderLink });
   } catch (error) {
@@ -304,7 +305,9 @@ const confirmOrder = async (req, res) => {
 
     if (!order.isTemporary || order.status == "CONFIRMADO") {
       console.warn("⚠️ Este pedido já foi confirmado.");
-      return res.status(400).json({ message: "Este pedido já foi confirmado." });
+      return res
+        .status(400)
+        .json({ message: "Este pedido já foi confirmado." });
     }
 
     const existingOrders = await Order.findOne({
@@ -316,7 +319,10 @@ const confirmOrder = async (req, res) => {
 
     if (!existingOrders) {
       order.trackingId = trackingId;
-      console.log("✅ Primeira compra detectada! Associando trackingId:",trackingId);
+      console.log(
+        "✅ Primeira compra detectada! Associando trackingId:",
+        trackingId
+      );
     } else {
       order.trackingId = null;
       console.log(
@@ -324,19 +330,27 @@ const confirmOrder = async (req, res) => {
       );
     }
 
-     // Atualizando o estoque
-     for (const item of order.products) {
+    // Atualizando o estoque
+    for (const item of order.products) {
       const product = await Product.findById(item.product); // Encontre o produto no banco
       if (product) {
         if (product.stock >= item.quantity) {
           product.stock -= item.quantity; // Diminui a quantidade do produto
           await product.save(); // Salva a alteração no banco
-          console.log(`✅ Estoque do produto ${product.name} atualizado: ${product.stock}`);
+          console.log(
+            `✅ Estoque do produto ${product.name} atualizado: ${product.stock}`
+          );
         } else {
-          return res.status(400).json({ message: `Estoque insuficiente para o produto ${product.name}.` });
+          return res
+            .status(400)
+            .json({
+              message: `Estoque insuficiente para o produto ${product.name}.`,
+            });
         }
       } else {
-        return res.status(404).json({ message: `Produto com ID ${item.product} não encontrado.` });
+        return res
+          .status(404)
+          .json({ message: `Produto com ID ${item.product} não encontrado.` });
       }
     }
 
@@ -358,7 +372,7 @@ const confirmOrder = async (req, res) => {
 const getOrderStatuses = async (req, res) => {
   try {
     // Captura os status diretamente do modelo ENUM
-    const statusField = Order.schema.path('status');
+    const statusField = Order.schema.path("status");
 
     if (!statusField || !statusField.enumValues) {
       throw new Error("Os status do pedido não foram encontrados no Model.");
@@ -376,43 +390,48 @@ const getOrderStatuses = async (req, res) => {
 
 const getAverageTimeBetweenPurchases = async (req, res) => {
   try {
-      const customers = await Order.aggregate([
-          {
-              $group: {
-                  _id: "$customer",
-                  orders: { $push: "$createdAt" } // Agrupa as datas de pedidos por cliente
-              }
+    const customers = await Order.aggregate([
+      {
+        $group: {
+          _id: "$customer",
+          orders: { $push: "$createdAt" }, // Agrupa as datas de pedidos por cliente
+        },
+      },
+    ]);
+
+    let totalDays = 0;
+    let totalIntervals = 0;
+
+    customers.forEach((customer) => {
+      // Filtra clientes com pelo menos duas compras
+      if (customer.orders.length > 1) {
+        const sortedOrders = customer.orders.sort(
+          (a, b) => new Date(a) - new Date(b)
+        );
+
+        for (let i = 1; i < sortedOrders.length; i++) {
+          const date1 = new Date(sortedOrders[i - 1]);
+          const date2 = new Date(sortedOrders[i]);
+
+          if (!isNaN(date1) && !isNaN(date2)) {
+            const diffInMs = date2 - date1;
+            const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+            totalDays += diffInDays;
+            totalIntervals++;
           }
-      ]);
+        }
+      }
+    });
 
-      let totalDays = 0;
-      let totalIntervals = 0;
+    const averageTime =
+      totalIntervals === 0 ? 0 : (totalDays / totalIntervals).toFixed(2);
 
-      customers.forEach((customer) => {
-          // Filtra clientes com pelo menos duas compras
-          if (customer.orders.length > 1) {
-              const sortedOrders = customer.orders.sort((a, b) => new Date(a) - new Date(b));
-
-              for (let i = 1; i < sortedOrders.length; i++) {
-                  const date1 = new Date(sortedOrders[i - 1]);
-                  const date2 = new Date(sortedOrders[i]);
-
-                  if (!isNaN(date1) && !isNaN(date2)) {
-                      const diffInMs = date2 - date1;
-                      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-                      totalDays += diffInDays;
-                      totalIntervals++;
-                  }
-              }
-          }
-      });
-
-      const averageTime = totalIntervals === 0 ? 0 : (totalDays / totalIntervals).toFixed(2);
-
-      res.json({ averageTimeBetweenPurchases: `${averageTime} dias` });
+    res.json({ averageTimeBetweenPurchases: `${averageTime} dias` });
   } catch (error) {
-      console.error("Erro ao calcular o tempo médio entre compras:", error);
-      res.status(500).json({ message: "Erro ao calcular o tempo médio entre compras" });
+    console.error("Erro ao calcular o tempo médio entre compras:", error);
+    res
+      .status(500)
+      .json({ message: "Erro ao calcular o tempo médio entre compras" });
   }
 };
 
@@ -421,7 +440,9 @@ const updateTrackingCode = async (req, res) => {
   const { trackingCode } = req.body;
 
   if (!trackingCode) {
-    return res.status(400).json({ error: "O código de rastreio é obrigatório." });
+    return res
+      .status(400)
+      .json({ error: "O código de rastreio é obrigatório." });
   }
 
   try {
@@ -454,27 +475,29 @@ const cancelOrder = async (req, res) => {
     const order = await Order.findOne({ _id: orderId, company: req.companyId });
 
     if (!order) {
-      return res.status(404).json({ message: 'Pedido não encontrado' });
+      return res.status(404).json({ message: "Pedido não encontrado" });
     }
 
     // 🧹 Limpa os dados do pedido e marca como CANCELADO
-    order.status = 'CANCELADO';
+    order.status = "CANCELADO";
     order.totalPrice = 0;
     order.products = [];
     order.discountRule = null;
     order.shippingPolicy = null;
     order.trackingId = null;
     order.trackingCode = null;
-    order.orderId = `CANCELADO-${Date.now()}`;; // ou `CANCELADO_123` se quiser manter ID visível
+    order.orderId = `CANCELADO-${Date.now()}`; // ou `CANCELADO_123` se quiser manter ID visível
 
     await order.save();
 
     return res.status(200).json(order);
   } catch (error) {
-    console.error('Erro ao cancelar pedido:', error);
-    return res.status(500).json({ message: 'Erro interno ao cancelar o pedido' });
+    console.error("Erro ao cancelar pedido:", error);
+    return res
+      .status(500)
+      .json({ message: "Erro interno ao cancelar o pedido" });
   }
-}
+};
 
 module.exports = {
   createOrder,
@@ -487,5 +510,5 @@ module.exports = {
   getOrderStatuses,
   getAverageTimeBetweenPurchases,
   updateTrackingCode,
-  cancelOrder
+  cancelOrder,
 };
