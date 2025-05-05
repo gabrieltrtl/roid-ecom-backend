@@ -24,13 +24,19 @@ function shouldApplyRule(rule, product) {
     }
   });
 
-  return rule.logic === 'and'
-    ? checks.every(Boolean)
-    : checks.some(Boolean);
+  if (rule.logic === 'and') return checks.every(Boolean);
+  if (rule.logic === 'or') return checks.some(Boolean);
+  return checks.length === 1 ? checks[0] : false; // ✅ modo "Nenhuma" (sem operador)
+
 }
 
 // Função para aplicar a primeira regra que bater no produto
 function calculateDiscountedPrice(product, discountRules = []) {
+  if (!Array.isArray(discountRules)) {
+    console.warn('⚠️ discountRules não é um array:', discountRules);
+    return product.price;
+  }
+
   for (const rule of discountRules) {
     if (shouldApplyRule(rule, product)) {
       const basePrice = product.price;
@@ -47,6 +53,7 @@ function calculateDiscountedPrice(product, discountRules = []) {
 
   return product.price;
 }
+
 
 module.exports = {
   shouldApplyRule,

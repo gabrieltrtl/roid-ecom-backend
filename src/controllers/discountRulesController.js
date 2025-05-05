@@ -2,6 +2,7 @@ const DiscountRule = require('../models/DiscountRule');
 
 // Criar nova regra de desconto
 const createDiscountRule = async (req, res) => {
+  console.log("📦 Dados recebidos:", req.body);
   try {
     const { name, description, rules } = req.body;
 

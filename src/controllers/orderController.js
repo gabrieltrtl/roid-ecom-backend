@@ -2,7 +2,7 @@ const Order = require("../models/Order");
 const Customer = require("../models/Customer");
 const Product = require("../models/Product"); // Adicionando a importação do modelo Product
 const DiscountRule = require("../models/DiscountRule");
-const { calculateDiscountPrice } = require("../utils/discountEngine");
+const { calculateDiscountedPrice } = require("../utils/discountEngine");
 
 // Função para criar um novo pedido
 const createOrder = async (req, res) => {
@@ -56,7 +56,8 @@ const createOrder = async (req, res) => {
 
       // aplicar desconto , se aplicável
       if (discountRule) {
-        productPrice = calculateDiscountPrice(product, discountRule);
+        productPrice = calculateDiscountedPrice(product, discountRule?.rules || []);
+
       }
 
       const productTotalPrice = productPrice * p.quantity; // Preço do produto * quantidade
@@ -233,11 +234,7 @@ const createTemporaryOrder = async (req, res) => {
 
       let productPrice = product.price;
 
-      // ✅ Aplicar o desconto, se aplicável
-      if (discountRule) {
-        productPrice = calculateDiscountedPrice(product, discountRule);
-      }
-
+    
       const productTotal = productPrice * p.quantity;
       totalPrice += productTotal;
 
