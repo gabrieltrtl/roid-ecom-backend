@@ -179,7 +179,7 @@ const deleteOrder = async (req, res) => {
 // Criar um pedido temporário e gerar link para o cliente
 const createTemporaryOrder = async (req, res) => {
   try {
-    const { products, discountRule: discountRuleId } = req.body;
+    const { products, discountRule: discountRuleId, totalPrice } = req.body;
     console.log("🏢 Empresa identificada:", req.companyId);
 
     if (!req.companyId) {
@@ -221,7 +221,7 @@ const createTemporaryOrder = async (req, res) => {
       }
     }
 
-    let totalPrice = 0;
+  
     const formattedProducts = products.map((p) => {
       const product = productsData.find(
         (prod) => prod._id.toString() === p.product.toString()
@@ -232,18 +232,12 @@ const createTemporaryOrder = async (req, res) => {
         throw new Error(`Produto com ID ${p.product} não encontrado.`);
       }
 
-      let productPrice = product.price;
-
-    
-      const productTotal = productPrice * p.quantity;
-      totalPrice += productTotal;
-
       return {
         product: product._id,
         name: product.name,
-        price: productPrice, // ✅ Preço com desconto aplicado
+        price: p.price, // ✅ Preço com desconto aplicado
         quantity: p.quantity,
-        subtotal: productTotal, // ✅ Subtotal armazenado
+        subtotal: p.subtotal, // ✅ Subtotal armazenado
       };
     });
 
