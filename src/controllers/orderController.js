@@ -280,7 +280,7 @@ const confirmOrder = async (req, res) => {
 
     const { orderId } = req.params;
     const { address, customer } = req.body;
-    const trackingId = req.headers["tracking-id"] || null; // Obtém o trackingId do cabeçalho da requisição
+    const trackingId = req.headers["tracking-id"] || null;
 
     console.log("🛠️ Recebendo requisição de confirmação...");
     console.log("🔹 orderId recebido:", orderId);
@@ -289,76 +289,100 @@ const confirmOrder = async (req, res) => {
     console.log("🔹 trackingId recebido:", trackingId);
 
     const order = await Order.findById(orderId);
-    console.log(order);
-
     if (!order) {
       return res.status(404).json({ message: "Pedido não encontrado!" });
     }
 
-    if (!order.isTemporary || order.status == "CONFIRMADO") {
+    if (!order.isTemporary || order.status === "CONFIRMADO") {
       console.warn("⚠️ Este pedido já foi confirmado.");
       return res
         .status(400)
         .json({ message: "Este pedido já foi confirmado." });
     }
 
+    // 🔍 Verifica se o cliente já existe pelo CPF
+    let existingCustomer = await Customer.findOne({ cpf: customer.cpf });
+
+    if (!existingCustomer) {
+      // 🔥 Garante que todos os campos obrigatórios sejam incluídos
+      const fullCustomer = {
+        ...customer,
+        company: req.companyId, // ✅ isso está garantido no seu middleware // 🔥 injeta empresa atual
+        address                     // 🔥 injeta endereço do corpo da requisição
+      };
+
+      console.log("🔥 Salvando novo cliente:", fullCustomer);
+
+      try {
+        existingCustomer = new Customer(fullCustomer);
+        await existingCustomer.save();
+        console.log("🆕 Cliente criado:", existingCustomer);
+      } catch (err) {
+        console.error("❌ Erro ao salvar novo cliente no banco:", err);
+        return res.status(500).json({
+          message: "Erro ao salvar cliente",
+          error: err.message,
+        });
+      }
+    } else {
+      console.log("👤 Cliente já existe.");
+    }
+
+    // 🧠 Verifica se é a primeira compra para aplicar trackingId
     const existingOrders = await Order.findOne({
-      customer,
+      customer: existingCustomer._id,
       isTemporary: false,
     });
 
-    console.log(existingOrders);
-
     if (!existingOrders) {
       order.trackingId = trackingId;
-      console.log(
-        "✅ Primeira compra detectada! Associando trackingId:",
-        trackingId
-      );
+      console.log("✅ Primeira compra detectada! Associando trackingId:", trackingId);
     } else {
       order.trackingId = null;
-      console.log(
-        "⚠️ Cliente já tem pedidos anteriores. Ignorando trackingId."
-      );
+      console.log("⚠️ Cliente já tem pedidos anteriores. Ignorando trackingId.");
     }
 
-    // Atualizando o estoque
+    // 🛒 Atualiza estoque
     for (const item of order.products) {
-      const product = await Product.findById(item.product); // Encontre o produto no banco
+      const product = await Product.findById(item.product);
       if (product) {
         if (product.stock >= item.quantity) {
-          product.stock -= item.quantity; // Diminui a quantidade do produto
-          await product.save(); // Salva a alteração no banco
-          console.log(
-            `✅ Estoque do produto ${product.name} atualizado: ${product.stock}`
-          );
+          product.stock -= item.quantity;
+          await product.save();
+          console.log(`✅ Estoque do produto ${product.name} atualizado: ${product.stock}`);
         } else {
-          return res
-            .status(400)
-            .json({
-              message: `Estoque insuficiente para o produto ${product.name}.`,
-            });
+          return res.status(400).json({
+            message: `Estoque insuficiente para o produto ${product.name}.`,
+          });
         }
       } else {
-        return res
-          .status(404)
-          .json({ message: `Produto com ID ${item.product} não encontrado.` });
+        return res.status(404).json({
+          message: `Produto com ID ${item.product} não encontrado.`,
+        });
       }
     }
 
-    order.isTemporary = false; // Marca como confirmado
-    order.status = "CONFIRMADO"; // atualiza o status
-    order.address = address; // Atualiza o endereço
-    order.customer = customer;
+    // ✅ Confirma o pedido
+    order.isTemporary = false;
+    order.status = "CONFIRMADO";
+    order.address = address;
+    order.customer = existingCustomer._id;
 
     await order.save();
 
     res.status(200).json({ message: "Pedido confirmado com sucesso!" });
   } catch (error) {
-    console.error("Erro ao confirmar pedido:", error);
-    res.status(500).json({ message: "Erro ao confirmar pedido" });
+    console.error("❌ Erro ao confirmar pedido:", error);
+    res.status(500).json({
+      message: "Erro ao confirmar pedido",
+      error: error.message,
+      stack: error.stack,
+    });
   }
 };
+
+
+
 
 // Puxar status disponívels no banco de dados
 const getOrderStatuses = async (req, res) => {
