@@ -307,8 +307,8 @@ const confirmOrder = async (req, res) => {
       // 🔥 Garante que todos os campos obrigatórios sejam incluídos
       const fullCustomer = {
         ...customer,
-        company: req.companyId, // ✅ isso está garantido no seu middleware // 🔥 injeta empresa atual
-        address                     // 🔥 injeta endereço do corpo da requisição
+        company: order.company, 
+        address                    
       };
 
       console.log("🔥 Salvando novo cliente:", fullCustomer);
