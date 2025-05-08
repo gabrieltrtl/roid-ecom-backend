@@ -181,6 +181,7 @@ const deleteOrder = async (req, res) => {
 const createTemporaryOrder = async (req, res) => {
   try {
     const { products, discountRule: discountRuleId, totalPrice } = req.body;
+    console.log("📦 Corpo recebido no backend:", req.body);
     console.log("🏢 Empresa identificada:", req.companyId);
 
     if (!req.companyId) {
@@ -255,6 +256,7 @@ const createTemporaryOrder = async (req, res) => {
       products: formattedProducts,
       discountRule: discountRuleId,
       totalPrice,
+      shippingPrice: req.body.shippingPrice,
       status: "PENDENTE",
       isTemporary: true,
     });
@@ -367,6 +369,7 @@ const confirmOrder = async (req, res) => {
     order.status = "CONFIRMADO";
     order.address = address;
     order.customer = existingCustomer._id;
+    order.shippingPrice = req.body.shippingPrice;
 
     await order.save();
 

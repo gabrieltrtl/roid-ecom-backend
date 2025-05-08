@@ -41,6 +41,10 @@ const OrderSchema = new mongoose.Schema({
     ref: 'DiscountRule', // ✅ Referência para o model DiscountRule
     default: null,
   },
+  shippingPrice: {
+    type: Number,
+    default: 0, // ✅ novo campo
+  },
   totalPrice: { 
     type: Number, 
     required: true 
