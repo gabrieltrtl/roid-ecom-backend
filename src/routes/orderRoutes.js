@@ -22,7 +22,7 @@ router.post('/', identifyCompany, createOrder);
 router.post('/temporary', identifyCompany, createTemporaryOrder);
 
 // Rota para confirmar pedido
-router.put('/confirm/:orderId', identifyCompany, confirmOrder);
+router.put('/confirm/:orderId', confirmOrder);
 
 // Listar todos os pedidos
 router.get('/', identifyCompany, getOrders);       
