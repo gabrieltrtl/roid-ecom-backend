@@ -31,7 +31,7 @@ router.get('/', identifyCompany, getOrders);
 router.get('/statuses', identifyCompany, getOrderStatuses);
 
 // Obter pedido específico
-router.get('/:id', identifyCompany, getOrderById);     
+router.get('/:id', getOrderById);     
 
 // Atualizar status do pedido
 router.put('/:id', identifyCompany, updateOrderStatus); 
