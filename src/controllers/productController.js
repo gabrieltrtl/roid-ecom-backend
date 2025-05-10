@@ -72,6 +72,38 @@ const updateProduct = async (req, res) => {
   }
 };
 
+const removeProductFromStock = async (req, res) => {
+  const { productId, quantity } = req.body;
+  const companyId = req.companyId;
+
+  if (!productId || !quantity || quantity <= 0) {
+    return res.status(400).json({ message: "Dados Inválidos para saída de estoque." });
+  }
+
+  try {
+    const product = await Product.findById( {_id: productId, company: companyId} );
+    if (!product) {
+      return res.status(404).json({ message: 'Produto não encontrado.' });
+    }
+
+    if (product.stock < quantity) {
+      return res.status(400).json({ message: 'Estoque insuficiente.' });
+    }
+
+    product.stock -= quantity;
+    await product.save();
+
+    res.status(200).json({
+      message: 'Saída registrada com sucesso.',
+      productId: product._id,
+      newStock: product.stock,
+    });
+  } catch (error) {
+    console.error('Erro ao remover produto do estoque:', error);
+    res.status(500).json({ message: 'Erro ao registrar saída de produto.' });
+  }
+}
+
 // Função para deletar um produto
 const deleteProduct = async (req, res) => {
   try {
