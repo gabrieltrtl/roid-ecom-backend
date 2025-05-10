@@ -155,5 +155,7 @@ module.exports = {
   getAllProducts,
   getProductById,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  removeProductFromStock,
+  addProductToStock
 };
