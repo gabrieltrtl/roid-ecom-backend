@@ -81,7 +81,7 @@ const removeProductFromStock = async (req, res) => {
   }
 
   try {
-    const product = await Product.findById( {_id: productId, company: companyId} );
+    const product = await Product.findById({ _id: productId, company: companyId });
     if (!product) {
       return res.status(404).json({ message: 'Produto não encontrado.' });
     }
@@ -101,6 +101,34 @@ const removeProductFromStock = async (req, res) => {
   } catch (error) {
     console.error('Erro ao remover produto do estoque:', error);
     res.status(500).json({ message: 'Erro ao registrar saída de produto.' });
+  }
+}
+
+const addProductToStock = async (req, res) => {
+  const { productId, quantity } = req.body;
+  const companyId = req.companyId;
+
+  if (!productId || !quantity || quantity <= 0) {
+    return res.status(400).json({ message: "Dados inválidos para entrada de estoque." });
+  }
+
+  try {
+    const product = await Product.findOne({ _id: productId, company: companyId });
+    if (!product) {
+      return res.status(404).json({ message: 'Produto não encontrado.' });
+    }
+
+    product.stock += quantity;
+    await product.save();
+
+    res.status(200).json({
+      message: 'Entrada registrada com sucesso.',
+      productId: product._id,
+      newStock: product.stock,
+    });
+  } catch (error) {
+    console.error('Erro ao adicionar produto ao estoque:', error);
+    res.status(500).json({ message: 'Erro ao registrar entrada de produto.' });
   }
 }
 
