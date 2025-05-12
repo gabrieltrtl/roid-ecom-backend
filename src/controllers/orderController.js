@@ -378,8 +378,21 @@ const confirmOrder = async (req, res) => {
   }
 };
 
+const updateConfirmedOrdersStatus = async (req, res) => {
+  try {
+    const companyId = req.companyId;
 
+    const result = await Order.updateMany(
+      { company: companyId, status: "CONFIRMADO" },
+      { $set: { status: "EM PROCESSAMENTO" } }
+    );
 
+    res.status(200).json({ message: "Status atualizado com sucesso", modifiedCount: result.modifiedCount });
+  } catch (err) {
+    console.error("Erro ao atualizar status dos pedidos:", err);
+    res.status(500).json({ message: "Erro ao atualizar status" });
+  }
+};
 
 // Puxar status disponívels no banco de dados
 const getOrderStatuses = async (req, res) => {
@@ -524,4 +537,5 @@ module.exports = {
   getAverageTimeBetweenPurchases,
   updateTrackingCode,
   cancelOrder,
+  updateConfirmedOrdersStatus
 };

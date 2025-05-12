@@ -12,7 +12,8 @@ const {
   getAverageTimeBetweenPurchases,
   getOrderStatuses,
   updateTrackingCode,
-  cancelOrder
+  cancelOrder,
+  updateConfirmedOrdersStatus
 } = require('../controllers/orderController');
 
 // Rota para criar pedido
@@ -38,6 +39,9 @@ router.put('/:id', identifyCompany, updateOrderStatus);
 
 // Atualizar código de rastreio
 router.patch('/:id/tracking-code', identifyCompany, updateTrackingCode); 
+
+// Atualizar pedido de confirmado para 'EM PROCESSAMENTO' (EM lotes).
+router.put("/update-status/processing", identifyCompany, updateConfirmedOrdersStatus);
 
 // Deletar pedido
 router.delete('/:id', identifyCompany, deleteOrder);  
