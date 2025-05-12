@@ -257,6 +257,7 @@ const createTemporaryOrder = async (req, res) => {
       discountRule: discountRuleId,
       totalPrice,
       shippingPrice: req.body.shippingPrice,
+      shippingName: req.body.shippingName || null,
       status: "PENDENTE",
       isTemporary: true,
     });

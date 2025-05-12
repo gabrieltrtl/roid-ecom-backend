@@ -54,10 +54,10 @@ const OrderSchema = new mongoose.Schema({
     enum: ['PENDENTE', 'ENVIADO', 'CANCELADO', 'CONFIRMADO', 'EM PROCESSAMENTO'],
     default: 'PENDENTE' 
   },
-  shippingType: { 
-    type: String, 
-    enum: ['standard', 'expresso', 'grátis'], 
-  }, // Tipo de frete
+  shippingName: {
+    type: String,
+    default: null
+  },  
   isTemporary: { type: Boolean, required: false }, 
   trackingId: { type: String, default: null }, // 🔹 Garante que trackingId pode ser salvo
   trackingCode: { type: String, default: null },
