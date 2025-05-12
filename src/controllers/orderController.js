@@ -513,7 +513,6 @@ const cancelOrder = async (req, res) => {
     order.shippingPolicy = null;
     order.trackingId = null;
     order.trackingCode = null;
-    order.orderId = `CANCELADO-${Date.now()}`; // ou `CANCELADO_123` se quiser manter ID visível
 
     await order.save();
 
