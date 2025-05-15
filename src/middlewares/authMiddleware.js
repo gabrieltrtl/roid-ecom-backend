@@ -15,9 +15,11 @@ const authMiddleware = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verifica a assinatura do token
     
     // Atribui os dados do usuário ao objeto `req`
-    req.userId = decoded.userId;
-    req.role = decoded.role;
-    req.companyId = decoded.companyId || null;
+    req.user = {
+      id: decoded.userId,
+      role: decoded.role,
+      companyId: decoded.companyId || null
+    };
     
     next();
   } catch (error) {
