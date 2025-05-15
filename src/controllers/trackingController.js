@@ -19,8 +19,6 @@ const createTracking = async (req, res) => {
 
     const newTracking = await Tracking.create({ influencerName, sellerPhone: formattedPhone, trackingId, company: req.companyId });
 
-    console.log("✅ Tracking criado com sucesso:", newTracking);
-
     return res.status(201).json(newTracking);
   } catch (error) {
     console.error("Erro ao criar trackingId:", error);

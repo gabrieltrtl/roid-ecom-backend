@@ -41,11 +41,7 @@ UserSchema.pre('save', async function (next) {
       return next(new Error('Senha inválida. Deve ter pelo menos 6 caracteres.'));
     }
 
-    console.log("🔎 rawPassword:", rawPassword);
-    console.log("🔎 typeof rawPassword:", typeof rawPassword);
-    console.log("🔎 bcrypt.hash typeof:", typeof bcrypt.hash);
-    console.log("🔎 Salt rounds hardcoded:", 10);
-    console.log("🔐 Senha antes do hash:", rawPassword, "| tipo:", typeof rawPassword);
+    
     // 🔐 Aplica hash com bcrypt
     this.password = await bcrypt.hash(rawPassword.trim(), 10);
     next();

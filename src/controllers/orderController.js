@@ -108,7 +108,7 @@ const getOrders = async (req, res) => {
 
     const orders = await Order.find(filter).populate(
       "customer",
-      "name surname cpf email address"
+      "name surname cpf phone email address"
     )
     .populate('products.product', 'name');
     res.status(200).json(orders);
@@ -181,8 +181,7 @@ const deleteOrder = async (req, res) => {
 const createTemporaryOrder = async (req, res) => {
   try {
     const { products, discountRule: discountRuleId, totalPrice } = req.body;
-    console.log("📦 Corpo recebido no backend:", req.body);
-    console.log("🏢 Empresa identificada:", req.companyId);
+    
 
     if (!req.companyId) {
       console.error("❌ Empresa não identificada.");
@@ -243,12 +242,7 @@ const createTemporaryOrder = async (req, res) => {
       };
     });
 
-    console.log("📝 Criando novo pedido temporário com os dados:", {
-      company: req.companyId,
-      products: formattedProducts,
-      discountRule: discountRuleId,
-      totalPrice,
-    });
+    
 
     // criar novo pedido temporário no banco de dados
     const newOrder = new Order({
@@ -279,17 +273,10 @@ const createTemporaryOrder = async (req, res) => {
 // Confirma uma ordem temporária
 const confirmOrder = async (req, res) => {
   try {
-    console.log("🔍 Headers recebidos:", req.headers);
-
     const { orderId } = req.params;
     const { address, customer } = req.body;
     const trackingId = req.headers["tracking-id"] || null;
 
-    console.log("🛠️ Recebendo requisição de confirmação...");
-    console.log("🔹 orderId recebido:", orderId);
-    console.log("🔹 address recebido:", address);
-    console.log("🔹 customer recebido:", customer);
-    console.log("🔹 trackingId recebido:", trackingId);
 
     const order = await Order.findById(orderId);
     if (!order) {
@@ -314,12 +301,10 @@ const confirmOrder = async (req, res) => {
         address                    
       };
 
-      console.log("🔥 Salvando novo cliente:", fullCustomer);
-
       try {
         existingCustomer = new Customer(fullCustomer);
         await existingCustomer.save();
-        console.log("🆕 Cliente criado:", existingCustomer);
+       
       } catch (err) {
         console.error("❌ Erro ao salvar novo cliente no banco:", err);
         return res.status(500).json({
@@ -327,9 +312,7 @@ const confirmOrder = async (req, res) => {
           error: err.message,
         });
       }
-    } else {
-      console.log("👤 Cliente já existe.");
-    }
+    } 
 
     // 🧠 Verifica se é a primeira compra para aplicar trackingId
     const existingOrders = await Order.findOne({
@@ -339,10 +322,9 @@ const confirmOrder = async (req, res) => {
 
     if (!existingOrders) {
       order.trackingId = trackingId;
-      console.log("✅ Primeira compra detectada! Associando trackingId:", trackingId);
     } else {
       order.trackingId = null;
-      console.log("⚠️ Cliente já tem pedidos anteriores. Ignorando trackingId.");
+
     }
 
     // 🛒 Atualiza estoque
@@ -351,7 +333,7 @@ const confirmOrder = async (req, res) => {
       if (product) {
         product.stock -= item.quantity;
         await product.save();
-        console.log(`✅ Estoque do produto ${product.name} atualizado: ${product.stock}`);
+    
       } else {
         return res.status(404).json({
           message: `Produto com ID ${item.product} não encontrado.`,
@@ -496,8 +478,7 @@ const updateTrackingCode = async (req, res) => {
 const cancelOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
-    console.log("🟡 Cancelando pedido ID:", orderId);
-    console.log("Empresa:", req.company?._id); // ← importante no multi-tenant
+  
 
     const order = await Order.findOne({ _id: orderId, company: req.companyId });
 

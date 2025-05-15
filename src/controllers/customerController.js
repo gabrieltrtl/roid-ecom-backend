@@ -3,16 +3,15 @@ const Customer = require("../models/Customer");
 // Função para criar um cliente
 const createCustomer = async (req, res) => {
   try {
-    console.log('Empresa identificada no req:', req.company); 
+    
     let { name, surname, email, password, phone, cpf, address } = req.body;
 
      // 🔥 Log inicial para depuração
-     console.log("📩 Recebendo requisição para criar cliente...");
-     console.log("📦 Dados recebidos:", req.body);
+     
 
     // 🔥 Removemos qualquer caractere especial do CPF ANTES de qualquer operação
     const formattedCpf = cpf.replace(/\D/g, "").trim();
-    console.log(`🔍 Buscando cliente com CPF: ${formattedCpf}`);
+    
 
     if (!name || !surname || !phone || !formattedCpf) {
       console.warn("⚠️ Dados obrigatórios ausentes. Cancelando criação...");
@@ -52,12 +51,11 @@ const createCustomer = async (req, res) => {
     if (password) {
       customerData.password = password;
     }
-    console.log("💾 Salvando novo cliente no banco...");
-    console.log('Customer Data:', customerData);
+    
     const customer = new Customer(customerData);
 
     await customer.save();
-    console.log("✅ Cliente salvo com sucesso!");
+  
     res.status(201).json({ message: "Cliente criado com sucesso!", customer });
   } catch (error) {
     console.error("❌ ERRO AO SALVAR CLIENTE NO BANCO:", error);
@@ -117,19 +115,15 @@ const getCustomerByCpf = async (req, res) => {
   let { cpf } = req.params;
   cpf = cpf.replace(/\D/g, "").trim();
 
-  console.log("🔍 CPF formatado para busca:", cpf);
-  console.log("🏢 Empresa identificada no req:", req.company);
+  
 
   try {
     // 🧪 Teste com regex — insira isso AQUI 👇
     const customers = await Customer.find({
       cpf: { $regex: cpf, $options: "i" }
     });
-    console.log("🧪 Clientes encontrados com regex:", customers);
+   
 
-    customers.forEach((c) => {
-      console.log("🧪 CPF no banco:", c.cpf, "| typeof:", typeof c.cpf, "| length:", c.cpf.length);
-    });
 
     // (mantenha sua query original aqui embaixo)
     const customer = await Customer.findOne({

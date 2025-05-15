@@ -4,7 +4,6 @@ const identifyCompany = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    console.log('Token Ausente na Requisição.')
     return res.status(400).json({ message: 'Token ausente.' })
   }
 
@@ -17,7 +16,7 @@ const identifyCompany = (req, res, next) => {
     req.userId = decoded.userId;
     req.role = decoded.role;
 
-    console.log("✅ Empresa e usuário identificados:", { companyId: req.companyId, userId: req.userId });
+    
 
     next();
   } catch (error) {

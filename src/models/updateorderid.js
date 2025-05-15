@@ -18,7 +18,7 @@ const updateOrderIds = async () => {
       await order.save(); // Salva a alteração
     }
 
-    console.log('Todos os pedidos foram atualizados com novos orderId!');
+    
     mongoose.disconnect();
   } catch (error) {
     console.error('Erro ao atualizar pedidos:', error);
