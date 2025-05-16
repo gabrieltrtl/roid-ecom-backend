@@ -479,11 +479,19 @@ const cancelOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
   
-
     const order = await Order.findOne({ _id: orderId, company: req.companyId });
 
     if (!order) {
       return res.status(404).json({ message: "Pedido não encontrado" });
+    }
+
+    if (order.status === "CONFIRMADO") {
+      for (const item of order.products) {
+        await Product.findOneAndUpdate(
+          { _id: item.product, company: req.companyId },
+          { $inc: { stock: item.quantity } }
+        );
+      }
     }
 
     // 🧹 Limpa os dados do pedido e marca como CANCELADO
