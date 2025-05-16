@@ -21,7 +21,7 @@ const identifyCompany = (req, res, next) => {
     next();
   } catch (error) {
     console.error("❌ Erro ao verificar token:", error);
-    return res.status(401).json({ message: 'Token inválido ou expirado.' });
+    return res.status(401).json({ message: 'Token inválido ou expirado' });
   }
 };
 
