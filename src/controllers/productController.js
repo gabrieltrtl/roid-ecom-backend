@@ -105,6 +105,7 @@ const removeProductFromStock = async (req, res) => {
 }
 
 const addProductToStock = async (req, res) => {
+  console.log("✅ Entrou na rota de adicionar produto ao estoque");
   const { productId, quantity } = req.body;
   const companyId = req.companyId;
 

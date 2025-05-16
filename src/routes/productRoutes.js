@@ -28,7 +28,7 @@ router.put('/:id', identifyCompany, updateProduct);
 router.post('/stock/remove', authMiddleware, removeProductFromStock);
 
 // Rota para adicionar um produto no estoque
-router.post('/stock/add', authMiddleware, addProductToStock);
+router.post('/stock/add', authMiddleware, identifyCompany, addProductToStock);
 
 // Rota para deletar um produto
 router.delete('/:id', identifyCompany, deleteProduct);

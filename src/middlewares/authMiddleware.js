@@ -4,6 +4,7 @@ const authMiddleware = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
+    console.log("❌ Sem token");
     return res.status(401).json({ message: 'Token não fornecido.' });
   }
 
