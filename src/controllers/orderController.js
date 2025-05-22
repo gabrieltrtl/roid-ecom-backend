@@ -3,6 +3,8 @@ const Customer = require("../models/Customer");
 const Product = require("../models/Product"); // Adicionando a importação do modelo Product
 const DiscountRule = require("../models/DiscountRule");
 const { calculateDiscountedPrice } = require("../utils/discountEngine");
+const Company = require("../models/Company");
+const { sendWhatsappTrackingMessage } = require('../utils/zapi');
 
 // Função para criar um novo pedido
 const createOrder = async (req, res) => {
@@ -143,21 +145,35 @@ const getOrderById = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { newStatus } = req.body;
 
-    const updatedOrder = await Order.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
+    const order = await Order.findOne({ _id: id, company: req.company.Id });
+    if (!order) return res.status(400).json({ message: "Pedido não encontrado!"});
 
-    if (!updatedOrder) {
-      return res.status(404).json({ message: "Pedido não encontrado" });
+    order.status = newStatus;
+    await order.save();
+
+    if (newStatus === "ENVIADO") {
+      const customer = await Customer.findOne({ _id: order.customer });
+      const company = await Company.findById(req.companyId);
+
+      // Garante que há remetentes e trackings pra enviar mensagens
+
+      if (customer?.phone && order?.trackingCode && company?.whatsappSenders.length) {
+        console.log("📨 Vai disparar WhatsApp agora...");
+        await sendWhatsappTrackingMessage(customer.phone, order.trackingCode, company.whatsappSenders, company.name);
+      }
     }
 
-    res.status(200).json(updatedOrder);
+    console.log("DEBUG - Novo status:", newStatus);
+    console.log("DEBUG - Phone:", customer?.phone);
+    console.log("DEBUG - Tracking:", order?.trackingCode);
+    console.log("DEBUG - Remetentes:", company?.whatsappSenders);
+
+    return res.status(200).json(order); 
   } catch (error) {
-    res.status(500).json({ message: "Erro ao atualizar pedido", error });
+    console.error("Erro ao atualizar status:", error); // ✅ Adicionado log
+    return res.status(500).json({ message: "Erro interno do servidor." });
   }
 };
 
@@ -455,17 +471,36 @@ const updateTrackingCode = async (req, res) => {
   }
 
   try {
+    // Atualiza trackingCode e status
     const updatedOrder = await Order.findOneAndUpdate(
       { _id: id, company: req.companyId },
       {
         trackingCode,
-        status: "ENVIADO", // ✅ Atualiza o status também
+        status: "ENVIADO",
       },
       { new: true }
     );
 
     if (!updatedOrder) {
       return res.status(404).json({ error: "Pedido não encontrado." });
+    }
+
+    // Busca cliente e empresa para disparar WhatsApp
+    const customer = await Customer.findById(updatedOrder.customer);
+    const company = await Company.findById(req.companyId);
+
+    if (
+      customer?.phone &&
+      updatedOrder?.trackingCode &&
+      company?.whatsappSenders?.length
+    ) {
+      console.log("📨 Disparando WhatsApp automático...");
+      await sendWhatsappTrackingMessage(
+        customer.phone,
+        updatedOrder.trackingCode,
+        company.whatsappSenders,
+        company.name
+      );
     }
 
     res.status(200).json(updatedOrder);
