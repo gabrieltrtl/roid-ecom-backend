@@ -1,11 +1,16 @@
 const mongoose = require('mongoose');
 
-const CompanySchema = new mongoose.Schema({
-name: { type: String, required: true },
+const whatsappSenderSchema = new mongoose.Schema({
+  name: String,
+  instanceId: { type: String, required: true },
+  token: { type: String, required: true },
+}, { _id: false });
 
-// 📦 Integração com Z-API
-  zapiInstanceId: { type: String, default: null }, // ID da instância logada via QR Code
-  zapiToken: { type: String, default: null } 
-},  { timestamps: true } );
+const CompanySchema = new mongoose.Schema({
+  name: { type: String, required: true },
+
+  // 🔁 Lista de números conectados via Z-API
+  whatsappSenders: [WhatsAppSenderSchema],
+}, { timestamps: true });
 
 module.exports = mongoose.model('Company', CompanySchema);
