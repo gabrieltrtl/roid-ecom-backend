@@ -21,11 +21,13 @@ const createCompany = async (req, res) => {
 };
 
 const updateZapiConfig = async (req, res) => {
+  console.log("🔍 companyId recebido:", req.companyId);
+  console.log("📦 Corpo da requisição:", req.body);
   try {
     const { whatsappSenders  } = req.body;
     
-    if (!Array.isArray(whatsappSenders) || whatsappSenders.length === 0) {
-      return res.status(400).json({ message: "Nenhum remetente informado." });
+    if (!Array.isArray(whatsappSenders)) {
+     res.status(400).json({ message: "Formato inválido. Deve ser um array." });
     }
 
     const company = await Company.findById(req.companyId);
