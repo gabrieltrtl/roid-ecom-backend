@@ -20,6 +20,29 @@ const createCompany = async (req, res) => {
   }
 };
 
+const updateZapiConfig = async (req, res) => {
+  try {
+    const { whatsappSenders  } = req.body;
+    
+    if (!Array.isArray(whatsappSenders) || whatsappSenders.length === 0) {
+      return res.status(400).json({ message: "Nenhum remetente informado." });
+    }
+
+    const company = await Company.findById(req.companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Empresa não encontrada." });
+    }
+
+    company.whatsappSenders = whatsappSenders;
+
+    await company.save();
+    return res.status(200).json({ message: "Configuração Z-API salva com sucesso!" });
+  } catch (error) {
+    console.error("Erro ao salvar config Z-API:", error);
+    return res.status(500).json({ message: "Erro interno ao salvar config." });
+  }
+}
+
 // ✅ Função para listar todas as empresas (útil para teste)
 const getAllCompanies = async (req, res) => {
   try {
@@ -32,5 +55,6 @@ const getAllCompanies = async (req, res) => {
 
 module.exports = {
   createCompany,
-  getAllCompanies // ✅ Exportação correta
+  getAllCompanies,
+  updateZapiConfig // ✅ Exportação correta
 };

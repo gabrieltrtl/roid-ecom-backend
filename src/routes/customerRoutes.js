@@ -18,7 +18,7 @@ router.post('/', identifyCompany, createCustomer);
 router.get('/', identifyCompany, getAllCustomers);
 
 // Rota para buscar cliente por CPF
-router.get('/cpf/:cpf', identifyCompany, getCustomerByCpf); // ✅ ESTA LINHA!
+router.get('/cpf/:cpf', identifyCompany, getCustomerByCpf); // 
 
 // Rota para buscar um cliente pelo ID
 router.get('/:id', identifyCompany, getCustomerById);
