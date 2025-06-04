@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const WhatsappSenderSchema = new mongoose.Schema({
   name: String,
+  apiUrl: { type: String, required: true },
   instanceId: { type: String, required: true },
   token: { type: String, required: true },
   clientToken: { type: String, required: true },
