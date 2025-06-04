@@ -307,7 +307,10 @@ const confirmOrder = async (req, res) => {
     }
 
     // 🔍 Verifica se o cliente já existe pelo CPF
-    let existingCustomer = await Customer.findOne({ cpf: customer.cpf });
+    let existingCustomer = await Customer.findOne({ 
+      cpf: customer.cpf,
+      company: order.company,
+     });
 
     if (!existingCustomer) {
       // 🔥 Garante que todos os campos obrigatórios sejam incluídos
