@@ -45,6 +45,20 @@ const updateZapiConfig = async (req, res) => {
   }
 }
 
+const getZapiConfig = async (req, res) => {
+  try {
+    const company = await Company.findById(req.companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Empresa não encontrada." });
+    }
+
+    res.status(200).json({ whatsappSenders: company.whatsappSenders || [] });
+  } catch (error) {
+    console.error("Erro ao buscar config Z-API:", error);
+    res.status(500).json({ message: "Erro interno ao buscar config." });
+  }
+};
+
 // ✅ Função para listar todas as empresas (útil para teste)
 const getAllCompanies = async (req, res) => {
   try {
@@ -58,5 +72,6 @@ const getAllCompanies = async (req, res) => {
 module.exports = {
   createCompany,
   getAllCompanies,
-  updateZapiConfig // ✅ Exportação correta
+  updateZapiConfig,
+  getZapiConfig // ✅ Exportação correta
 };
