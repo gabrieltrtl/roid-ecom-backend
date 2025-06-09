@@ -11,7 +11,7 @@ router.post("/", identifyCompany, createTracking);
 router.get("/", identifyCompany, getAllTrackings);
 
 // Buscar trackingId específico
-router.get("/:trackingId", identifyCompany, getTracking);
+router.get("/:trackingId", getTracking);
 
 // Buscar vendas por trackingId
 router.get("/:trackingId/sales", identifyCompany, getSalesByTrackingId);

@@ -42,7 +42,7 @@ const getTracking = async (req, res) => {
   const { trackingId } = req.params;
 
   try {
-    const tracking = await Tracking.findOne({ trackingId, company: req.companyId });
+    const tracking = await Tracking.findOne({ trackingId });
 
     if (!tracking) {
       return res.status(404).json({ message: "Tracking ID não encontrado ou não pertence à empresa." });
