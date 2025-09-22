@@ -19,7 +19,7 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Senha inválida.' });
     }
 
-    if (!user.isActive) {
+    if (user.isActive === false) {
       return res.status(403).json({ message: "Conta bloqueada. Pagamento pendente." });
     }
 
