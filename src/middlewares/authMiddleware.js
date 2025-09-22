@@ -18,10 +18,11 @@ const authMiddleware = async (req, res, next) => {
     // Atribui os dados do usuário ao objeto `req`
     req.user = {
       id: decoded.userId,
-      role: decoded.role,
+      role: String(decoded.role || '').trim().toLowerCase(),
       companyId: decoded.companyId || null
     };
     
+    console.log('auth payload =>', req.user);
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Token inválido ou expirado' });

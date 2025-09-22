@@ -19,6 +19,10 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Senha inválida.' });
     }
 
+    if (!user.isActive) {
+      return res.status(403).json({ message: "Conta bloqueada. Pagamento pendente." });
+    }
+
     const token = jwt.sign(
       {
         userId: user._id,

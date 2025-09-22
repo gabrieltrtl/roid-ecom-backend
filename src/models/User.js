@@ -16,7 +16,8 @@ const UserSchema = new mongoose.Schema({
     required: function() {
       return this.role !== 'superadmin';
     }
-  }
+  },
+  isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 
 // Hash da senha antes de salvar
